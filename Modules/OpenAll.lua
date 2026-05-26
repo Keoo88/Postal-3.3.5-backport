@@ -282,20 +282,20 @@ function Postal_OpenAll:ProcessNext()
 			local name, itemID, itemTexture, count, quality, canUse = GetInboxItem(mailIndex, attachIndex)
 			local link = GetInboxItemLink(mailIndex, attachIndex)
 			local itemID = strmatch(link, "item:(%d+)")
-			local stackSize = select(8, C_Item.GetItemInfo(link))
-			if itemID and stackSize and C_Item.GetItemCount(itemID) > 0 then
+			local stackSize = select(8, GetItemInfo(link))
+			if itemID and stackSize and GetItemCount(itemID) > 0 then
 				for bag = 0, NUM_BAG_SLOTS do
 					local ContainerNumSlots
-					if Postal.WOWBCClassic then
+					if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 						ContainerNumSlots = GetContainerNumSlots(bag)
 					else
 						ContainerNumSlots = C_Container.GetContainerNumSlots(bag)
 					end
 					for slot = 1, ContainerNumSlots do
 						local count2, link2
-						if Postal.WOWBCClassic then
-							count2 = select(2, GetContainerItemInfo(bag, slot))
-							link2 = select(7, GetContainerItemInfo(bag, slot))
+						if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
+								count2 = select(2, GetContainerItemInfo(bag, slot))
+								link2 = select(7, GetContainerItemInfo(bag, slot))
 						else
 							if C_Container and C_Container.GetContainerItemInfo(bag, slot) then
 								local itemInfo = C_Container.GetContainerItemInfo(bag, slot)

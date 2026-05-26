@@ -51,7 +51,7 @@ local function ContainsStackableItem(messageindex)
 	for itemIndex = 1, ATTACHMENTS_MAX_SEND do
 		itemID = select(2, GetInboxItem(messageindex, itemIndex))
 		if itemID ~= nil then
-			itemStackCount = select(8,C_Item.GetItemInfo(itemID))
+			itemStackCount = select(8,GetItemInfo(itemID))
 			if itemStackCount > 1 then return true end
 		end
 	end
@@ -64,11 +64,11 @@ local function FreeBagSpace()
 	local FreeSpace = 0
 	for bagID = 0, 4, 1 do
 		local numberOfFreeSlots, bagType
---		if Postal.WOWBCClassic then
---			numberOfFreeSlots, bagType = GetContainerNumFreeSlots(bagID)
---		else
+		if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
+			numberOfFreeSlots, bagType = GetContainerNumFreeSlots(bagID)
+		else
 			numberOfFreeSlots, bagType = C_Container.GetContainerNumFreeSlots(bagID)
---		end
+		end
 		FreeSpace = FreeSpace + numberOfFreeSlots
 	end
 	return FreeSpace
@@ -81,7 +81,7 @@ local function Postal_Inventory_Change(action)
 	if action == 1 then	-- take snap shot of current container free space tables and store
 		wipe(PostalForwardTable)
 		for bagID = 0, 4, 1 do
-			if Postal.WOWBCClassic then
+			if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 				table.insert(PostalForwardTable, GetContainerFreeSlots(bagID))
 			else
 				table.insert(PostalForwardTable, C_Container.GetContainerFreeSlots(bagID))
@@ -92,7 +92,7 @@ local function Postal_Inventory_Change(action)
 	if action == 2 then	-- take new snap shot of current container free space tables and compared with stored one
 		wipe(TempTable)
 		for bagID = 0, 4, 1 do
-			if Postal.WOWBCClassic then
+			if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 				TempTable = GetContainerFreeSlots(bagID)
 			else
 				TempTable = C_Container.GetContainerFreeSlots(bagID)
@@ -159,7 +159,7 @@ function Postal_Forward_ForwardMailItems(action)
 	if action == 2 then
 		Postal_Forward:UnregisterEvent("BAG_UPDATE_DELAYED","Postal_Forward_ForwardMailItemsEvent")
 		bagID, itemIndex = Postal_Inventory_Change(2)
-		if Postal.WOWBCClassic then
+		if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 			PickupContainerItem(bagID, itemIndex)
 		else
 			C_Container.PickupContainerItem(bagID, itemIndex)

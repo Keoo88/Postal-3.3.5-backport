@@ -214,13 +214,14 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 			(bagID == 4) and Postal.db.profile.QuickAttach.EnableBag4 or
 			(bagID == 5) and Postal.db.profile.QuickAttach.EnableBag5
 		then
-			if Postal.WOWBCClassic then
+			local useOldAPI = Postal.WOWBCClassic or Postal.WOWWotLKClassic
+			if useOldAPI then
 				numberOfSlots = GetContainerNumSlots(bagID)
 			else
 				numberOfSlots = C_Container.GetContainerNumSlots(bagID)
 			end
 			for slotIndex = 1, numberOfSlots, 1 do
-				if Postal.WOWBCClassic then
+				if useOldAPI then
 					locked = select(3, GetContainerItemInfo(bagID, slotIndex))
 				else
 					if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
@@ -231,7 +232,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 					end
 				end
 				if locked == false then
-					if Postal.WOWBCClassic then
+					if useOldAPI then
 						itemID = select(10, GetContainerItemInfo(bagID, slotIndex))
 					else
 						if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
@@ -242,14 +243,15 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 						end
 					end
 					if itemID then
-						bindType = select(14, C_Item.GetItemInfo(itemID))
-						if bindType ~= 	LE_ITEM_BIND_ON_ACQUIRE then
-							itemclassID = select(12, C_Item.GetItemInfo(itemID))
+						bindType = select(14, GetItemInfo(itemID))
+						local BIND_ON_ACQUIRE = 1
+						if bindType ~= BIND_ON_ACQUIRE then
+							itemclassID = select(12, GetItemInfo(itemID))
 							if itemclassID == classID then
-								itemsubclassID = select(13, C_Item.GetItemInfo(itemID))
+								itemsubclassID = select(13, GetItemInfo(itemID))
 								if itemsubclassID == subclassID or subclassID == -1 then
 										if SendMailNumberOfFreeSlots() > 0 then
-											if Postal.WOWBCClassic then
+											if useOldAPI then
 												PickupContainerItem(bagID, slotIndex)
 											else
 												C_Container.PickupContainerItem(bagID, slotIndex)
