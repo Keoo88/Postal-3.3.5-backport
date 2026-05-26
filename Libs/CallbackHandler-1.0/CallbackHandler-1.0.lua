@@ -19,9 +19,18 @@ local dispatchFunc
 if securecallfunction then
 	dispatchFunc = function(fn, ...) securecallfunction(fn, ...) end
 else
+	-- WotLK 3.3.5 (Lua 5.1): xpcall does not pass extra arguments, use a closure
 	local geterrorhandler = geterrorhandler
 	local xpcall = xpcall
-	dispatchFunc = function(fn, ...) xpcall(fn, geterrorhandler(), ...) end
+	local eh = geterrorhandler()
+	dispatchFunc = function(fn, ...)
+		local args = select("#", ...)
+		if args > 0 then
+			xpcall(function() fn(...) end, eh)
+		else
+			xpcall(fn, eh)
+		end
+	end
 end
 
 local function Dispatch(handlers, ...)

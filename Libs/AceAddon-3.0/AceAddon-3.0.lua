@@ -67,7 +67,13 @@ local function safecall(func, ...)
 	-- this safecall is used for optional functions like OnInitialize OnEnable etc. When they are not
 	-- present execution should continue without hinderance
 	if type(func) == "function" then
-		return xpcall(func, errorhandler, ...)
+		-- WotLK 3.3.5 (Lua 5.1): xpcall does not pass extra arguments, use a closure
+		local args = select("#", ...)
+		if args > 0 then
+			return xpcall(function() func(...) end, errorhandler)
+		else
+			return xpcall(func, errorhandler)
+		end
 	end
 end
 
