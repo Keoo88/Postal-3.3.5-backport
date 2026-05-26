@@ -7,22 +7,53 @@ Postal_Express.description2 = L[ [[|cFFFFCC00*|r Shift-Click to take item/money 
 |cFFFFCC00*|r Alt-Click to move an item from your inventory to the current outgoing mail (same as right click in default UI).]] ]
 
 local _G = getfenv(0)
-local ContainerItemHookName = "ContainerFrameItemButton_OnClick"
+
+local function Postal_Express_HookBagButtons(self)
+	for bag = 0, NUM_BAG_FRAMES do
+		local frame = _G["ContainerFrame"..(bag+1)]
+		if frame then
+			for slot = 1, GetContainerNumSlots(bag) do
+				local button = _G["ContainerFrame"..(bag+1).."Item"..slot]
+				if button and not self:IsHooked(button, "OnClick") then
+					self:RawHookScript(button, "OnClick", "ContainerFrameItemButton_OnHook")
+				end
+			end
+		end
+	end
+end
+
+local function Postal_Express_UnhookBagButtons(self)
+	for bag = 0, NUM_BAG_FRAMES do
+		local frame = _G["ContainerFrame"..(bag+1)]
+		if frame then
+			for slot = 1, GetContainerNumSlots(bag) do
+				local button = _G["ContainerFrame"..(bag+1).."Item"..slot]
+				if button and self:IsHooked(button, "OnClick") then
+					self:Unhook(button, "OnClick")
+				end
+			end
+		end
+	end
+end
 
 function Postal_Express:MAIL_SHOW()
-	if Postal.db.profile.Express.EnableAltClick and not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
-		self:HookScript(GameTooltip, "OnTooltipSetItem")
-		self:RawHook(ContainerItemHookName, true)
+	if Postal.db.profile.Express.EnableAltClick then
+		if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
+			self:HookScript(GameTooltip, "OnTooltipSetItem")
+		end
+		Postal_Express_HookBagButtons(self)
+		self:RegisterEvent("BAG_UPDATE", "MAIL_SHOW")
 	end
 	self:RegisterEvent("MAIL_CLOSED", "Reset")
 	self:RegisterEvent("PLAYER_LEAVING_WORLD", "Reset")
 end
 
 function Postal_Express:Reset(event)
+	Postal_Express_UnhookBagButtons(self)
 	if self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 		self:Unhook(GameTooltip, "OnTooltipSetItem")
-		self:Unhook(ContainerItemHookName)
 	end
+	self:UnregisterEvent("BAG_UPDATE")
 	self:UnregisterEvent("MAIL_CLOSED")
 	self:UnregisterEvent("PLAYER_LEAVING_WORLD")
 end
@@ -40,9 +71,9 @@ end
 
 function Postal_Express:OnDisable()
 	local module = self or Postal_Express
+	Postal_Express_UnhookBagButtons(module)
 	if module:IsHooked(GameTooltip, "OnTooltipSetItem") then
 		module:Unhook(GameTooltip, "OnTooltipSetItem")
-		module:Unhook(ContainerItemHookName)
 	end
 	if module:IsHooked("InboxFrame_OnClick") then
 		module:Unhook("InboxFrame_OnClick")
@@ -276,13 +307,13 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 	end
 end
 
-function Postal_Express:ContainerFrameItemButton_OnClick(this, button, ...)
+function Postal_Express:ContainerFrameItemButton_OnHook(this, button, ...)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
 	Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, button)
-	return self.hooks[ContainerItemHookName](this, button, ...)
+	return self.hooks[this].OnClick(this, button, ...)
 end
 
-Postal_Express.ContainerFrameItemButton_OnModifiedClick = Postal_Express.ContainerFrameItemButton_OnClick
+Postal_Express.ContainerFrameItemButton_OnModifiedClick = Postal_Express.ContainerFrameItemButton_OnHook
 
 function Postal_Express.HandleModifiedItemClick(itemLink, itemLocation)
 	if itemLocation ~= nil then -- item location is only not nil for bag item clicks
@@ -296,14 +327,16 @@ function Postal_Express.SetEnableAltClick(dropdownbutton, arg1, arg2, checked)
 	local self = Postal_Express
 	Postal.db.profile.Express.EnableAltClick = checked
 	if checked then
-		if MailFrame:IsVisible() and not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
-			self:HookScript(GameTooltip, "OnTooltipSetItem")
-			self:RawHook(ContainerItemHookName, true)
+		if MailFrame:IsVisible() then
+			if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
+				self:HookScript(GameTooltip, "OnTooltipSetItem")
+			end
+			Postal_Express_HookBagButtons(self)
 		end
 	else
+		Postal_Express_UnhookBagButtons(self)
 		if self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 			self:Unhook(GameTooltip, "OnTooltipSetItem")
-			self:Unhook(ContainerItemHookName)
 		end
 	end
 	-- A hack to get the next button to disable/enable
