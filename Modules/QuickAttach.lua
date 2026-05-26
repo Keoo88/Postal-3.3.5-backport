@@ -235,13 +235,13 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 					if useOldAPI then
 						local link = GetContainerItemLink(bagID, slotIndex)
 						if link then
-							local _, _, id = strfind(link, "item:(%d+)")
-							itemID = tonumber(id)
+							itemID = tonumber(strmatch(link, "(%d+)"))
 							if itemID then
-								local _, _, _, _, _, _, _, _, _, _, _, iclass, isubclass, ibind = GetItemInfo(link)
-								if iclass and ibind then
-									if ibind ~= 1 then
-										if iclass == classID and (isubclass == subclassID or subclassID == -1) then
+								local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+								if itemType then
+									local className = GetItemClassInfo(classID)
+									if itemType == className then
+										if subclassID == -1 or itemSubType == GetItemSubClassInfo(classID, subclassID) then
 											if SendMailNumberOfFreeSlots() > 0 then
 												PickupContainerItem(bagID, slotIndex)
 												ClickSendMailItemButton()
