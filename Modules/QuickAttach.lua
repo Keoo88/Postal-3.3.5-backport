@@ -66,6 +66,16 @@ local function Postal_QuickAttachShowButtons()
 	end
 end
 
+local function Postal_QuickAttach_Reposition()
+	for i = 1, #QAButtons, 1 do
+		local button = _G[QAButtons[i][1]]
+		if button then
+			button:ClearAllPoints()
+			button:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", -10, -10 - (37 + 0) * (i - 1))
+		end
+	end
+end
+
 -- Create QuickAttach buttons and hook OnClick events
 function Postal_QuickAttach:OnEnable()
 	if not Postal_QuickAttachButton1 then
@@ -171,6 +181,7 @@ function Postal_QuickAttach:OnEnable()
 			CreateQAButton(QAButtons[i][1], QAButtons[i][2], QAButtons[i][3], QAButtons[i][4], QAButtons[i][5])
 		end
 	end
+	Postal_QuickAttach_Reposition()
 	Postal_QuickAttachShowButtons()
 end
 
