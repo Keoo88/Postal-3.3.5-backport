@@ -11,6 +11,7 @@ Postal_QuickAttach.description2 = L[ [[|cFFFFCC00*|r A default recipient name ca
 local QAButtonPos = 0 -- Needed due to lack of static variables in lua
 local QAButtonDialogInfo = "" -- Name|classID|subclassID
 local QAButtons
+local WotLKClassName -- cached localized class name (e.g. "Trade Goods")
 
 -- Set a button's GameTooltip
 local function SetQAButtonGameTooltip(button, toolTip)
@@ -69,6 +70,9 @@ end
 function Postal_QuickAttach:OnEnable()
 	if not Postal_QuickAttachButton1 then
 		QAButtons = {}
+		if Postal.WOWWotLKClassic then
+			WotLKClassName = select(6, GetItemInfo(34054)) -- Infinite Dust → "Trade Goods" (localized)
+		end
 		if Postal.WOWClassic == true then
 			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(2018), 7, 0, L["Trade Goods"]})
 			table.insert(QAButtons, {"Postal_QuickAttachButton2", "Interface/Icons/inv_misc_food_02", 5, 0, L["Reagent"]})
@@ -197,6 +201,10 @@ end
 -- Attach as many items as possible of the specified type to the current send mail.
 function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 	local bagID, bindType, itemclassID, itemID, itemsubclassID, locked, numberOfSlots, slot, slotIndex
+	local useOldAPI = Postal.WOWBCClassic or Postal.WOWWotLKClassic
+	if useOldAPI and not WotLKClassName then
+		WotLKClassName = select(6, GetItemInfo(34054))
+	end
 	local name = Postal_QuickAttachGetQAButtonCharName(classID, subclassID)
 	if name ~= "" then
 		SendMailNameEditBox:SetText(name)
@@ -214,7 +222,6 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 			(bagID == 4) and Postal.db.profile.QuickAttach.EnableBag4 or
 			(bagID == 5) and Postal.db.profile.QuickAttach.EnableBag5
 		then
-			local useOldAPI = Postal.WOWBCClassic or Postal.WOWWotLKClassic
 			if useOldAPI then
 				numberOfSlots = GetContainerNumSlots(bagID)
 			else
@@ -238,13 +245,20 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 							itemID = tonumber(strmatch(link, "(%d+)"))
 							if itemID then
 								local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
-								if itemType then
-									local className = GetItemClassInfo(classID)
-									if itemType == className then
-										if subclassID == -1 or itemSubType == GetItemSubClassInfo(classID, subclassID) then
-											if SendMailNumberOfFreeSlots() > 0 then
-												PickupContainerItem(bagID, slotIndex)
-												ClickSendMailItemButton()
+								if itemType and WotLKClassName and itemType == WotLKClassName then
+									if subclassID == -1 then
+										if SendMailNumberOfFreeSlots() > 0 then
+											PickupContainerItem(bagID, slotIndex)
+											ClickSendMailItemButton()
+										end
+									else
+										for _, btn in ipairs(QAButtons) do
+											if btn[3] == classID and btn[4] == subclassID and itemSubType == btn[5] then
+												if SendMailNumberOfFreeSlots() > 0 then
+													PickupContainerItem(bagID, slotIndex)
+													ClickSendMailItemButton()
+												end
+												break
 											end
 										end
 									end
