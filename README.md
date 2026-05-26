@@ -69,7 +69,7 @@ This repository is a **backport of Postal v3.6.9c from WotLK Classic to WoW
    ```
    World of Warcraft\Interface\AddOns\Postal
    ```
-5. Restart the game (or `/reload`) and enable **Postal** in the addon list.
+
 
 ### Modules
 
@@ -177,8 +177,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
    ```
    World of Warcraft\Interface\AddOns\Postal
    ```
-5. Перезагрузите игру (или `/reload`) и включите **Postal** в списке
-   аддонов.
+
 
 ### Модули
 
