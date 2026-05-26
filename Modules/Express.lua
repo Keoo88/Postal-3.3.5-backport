@@ -7,12 +7,7 @@ Postal_Express.description2 = L[ [[|cFFFFCC00*|r Shift-Click to take item/money 
 |cFFFFCC00*|r Alt-Click to move an item from your inventory to the current outgoing mail (same as right click in default UI).]] ]
 
 local _G = getfenv(0)
-local ContainerItemHookName
-if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-	ContainerItemHookName = "ContainerFrameItemButton_OnClick"
-else
-	ContainerItemHookName = "ContainerFrameItemButton_OnModifiedClick"
-end
+local ContainerItemHookName = "ContainerFrameItemButton_OnClick"
 
 function Postal_Express:MAIL_SHOW()
 	if Postal.db.profile.Express.EnableAltClick and not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
