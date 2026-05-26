@@ -127,9 +127,7 @@ function Postal_Select:OnEnable()
 	self:RegisterEvent("MAIL_SHOW")
 
 	if InboxTooMuchMail then
-	if InboxTooMuchMail then
 		InboxTooMuchMail.Show = printTooMuchMail
-	end
 		InboxTooMuchMail:Hide()
 	end
 

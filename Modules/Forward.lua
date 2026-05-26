@@ -84,7 +84,8 @@ local function Postal_Inventory_Change(action)
 		wipe(PostalForwardTable)
 		for bagID = 0, 4, 1 do
 			if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-				table.insert(PostalForwardTable, GetContainerFreeSlots(bagID))
+				local slots = GetContainerFreeSlots(bagID)
+				table.insert(PostalForwardTable, type(slots) == "table" and slots or {})
 			else
 				table.insert(PostalForwardTable, C_Container.GetContainerFreeSlots(bagID))
 			end
@@ -96,6 +97,7 @@ local function Postal_Inventory_Change(action)
 		for bagID = 0, 4, 1 do
 			if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 				TempTable = GetContainerFreeSlots(bagID)
+				if type(TempTable) ~= "table" then TempTable = {} end
 			else
 				TempTable = C_Container.GetContainerFreeSlots(bagID)
 			end
@@ -133,7 +135,7 @@ function Postal_Forward_OpenMail_Forward()
 		subject = prefix..subject
 	end
 	if subject then SendMailSubjectEditBox:SetText(subject) end
-	if Postal.WOWClassic or Postal.WOWWotLKClassic or Postal.WOWCataClassic or Postal.WOWMists then
+	if Postal.WOWCataClassic or Postal.WOWMists or Postal.WOWRetail then
 		if bodyText then MailEditBox.ScrollBox.EditBox:SetText(bodyText) end
 	else
 		if bodyText then SendMailBodyEditBox:SetText(bodyText) end
