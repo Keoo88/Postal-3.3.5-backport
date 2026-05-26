@@ -52,7 +52,7 @@ local function ContainsStackableItem(messageindex)
 		itemID = select(2, GetInboxItem(messageindex, itemIndex))
 		if itemID ~= nil then
 			itemStackCount = select(8,GetItemInfo(itemID))
-			if itemStackCount > 1 then return true end
+			if itemStackCount and itemStackCount > 1 then return true end
 		end
 	end
 	return false
