@@ -1,5 +1,10 @@
 --[[ $Id: CallbackHandler-1.0.lua 22 2018-07-21 14:17:22Z nevcairiel $ ]]
 local MAJOR, MINOR = "CallbackHandler-1.0", 7
+
+-- If CallbackHandler is already registered by another addon, use it without upgrade to avoid conflicts
+local existing = LibStub:GetLibrary(MAJOR, true)
+if existing then return end
+
 local CallbackHandler = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not CallbackHandler then return end -- No upgrade needed
