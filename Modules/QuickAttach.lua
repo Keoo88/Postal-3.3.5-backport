@@ -185,7 +185,7 @@ local function SendMailNumberOfFreeSlots()
 	local itemIndex, NumberOfFreeSlots
 	NumberOfFreeSlots = ATTACHMENTS_MAX_SEND
 	for itemIndex = 1, ATTACHMENTS_MAX_SEND do
-		if HasSendMailItem(itemIndex) then
+		if GetSendMailItem(itemIndex) then
 			NumberOfFreeSlots = NumberOfFreeSlots - 1
 		end
 	end
