@@ -12,9 +12,9 @@ if GetLocale() == "ruRU" then
 	--COPPER_AMOUNT = "%d |4медная монета:медные монеты:медных монет;"; -- Lowest value coin denomination
 	--SILVER_AMOUNT = "%d |4серебряная:серебряные:серебряных;"; -- Mid value coin denomination
 	--GOLD_AMOUNT = "%d |4золотая:золотые:золотых;"; -- Highest value coin denomination
-	g = "^%[%d+з %d+с %d+м%]$"
-	s = "^%[%d+с %d+м%]$"
-	c = "^%[%d+м%]$"
+	g = "^%[%dз %dс %dм%]$"
+	s = "^%[%dс %dм%]$"
+	c = "^%[%dм%]$"
 end
 g = gsub(g, "%%d", "%%d+")
 s = gsub(s, "%%d", "%%d+")
@@ -45,11 +45,11 @@ function Postal_Wire:onValueChangedFunc()
 			local copper = mod(money, 100)
 			if GetLocale() == "ruRU" then
 				if gold > 0 then
-					SendMailSubjectEditBox:SetText(format("[%d+з %d+с %d+м]", gold, silver, copper))
+					SendMailSubjectEditBox:SetText(format("[%dз %dс %dм]", gold, silver, copper))
 				elseif silver > 0 then
-					SendMailSubjectEditBox:SetText(format("[%d+с %d+м]", silver, copper))
+					SendMailSubjectEditBox:SetText(format("[%dс %dм]", silver, copper))
 				else
-					SendMailSubjectEditBox:SetText(format("[%d+м]", copper))
+					SendMailSubjectEditBox:SetText(format("[%dм]", copper))
 				end
 			else
 				if gold > 0 then
