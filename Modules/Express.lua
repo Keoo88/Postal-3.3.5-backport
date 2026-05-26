@@ -78,7 +78,7 @@ function Postal_Express:InboxFrameItem_OnEnter(this, motion)
 	local money, COD, _, hasItem, _, wasReturned, _, canReply = select(5, GetInboxHeaderInfo(this.index))
 	if Postal.db.profile.Express.MultiItemTooltip and hasItem and hasItem > 1 then
 		for i = 1, ATTACHMENTS_MAX_RECEIVE do
-			local name, itemID, itemTexture, count, quality, canUse = GetInboxItem(this.index, i);
+			local name, itemTexture, count, quality, canUse = GetInboxItem(this.index, i);
 			if name then
 				local itemLink = GetInboxItemLink(this.index, i) or name
 				local tex = itemTexture and ("\124T%s:0\124t "):format(itemTexture) or ""
@@ -87,8 +87,6 @@ function Postal_Express:InboxFrameItem_OnEnter(this, motion)
 				else
 					tooltip:AddLine(("%s%s"):format(tex, itemLink))
 				end
-				-- this only works for first 10 items:
-				--tooltip:AddTexture(itemTexture)
 			end
 		end
 	end
