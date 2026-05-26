@@ -355,9 +355,9 @@ function Postal_Select:ProcessNext()
 			-- If inventory is full, check if the item to be looted can stack with an existing stack
 			local lootFlag = false
 			if attachIndex > 0 and invFull then
-				local name, itemID, itemTexture, count, quality, canUse = GetInboxItem(mailIndex, attachIndex)
+				local name, _, count, quality = GetInboxItem(mailIndex, attachIndex)
 				local link = GetInboxItemLink(mailIndex, attachIndex)
-				itemID = strmatch(link, "item:(%d+)")
+				local itemID = strmatch(link, "item:(%d+)")
 				local stackSize = select(8, GetItemInfo(link))
 				if itemID and stackSize and GetItemCount(itemID) > 0 then
 					for bag = 0, NUM_BAG_SLOTS do

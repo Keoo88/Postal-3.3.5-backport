@@ -43,16 +43,18 @@ local function contains(table, val)
    return false
 end
 
--- Check if a mail message contains any stackable item attachments 
 local function ContainsStackableItem(messageindex)
-	local hasItem, itemID, itemIndex, itemStackCount
+	local hasItem, itemIndex, itemStackCount
 	hasItem = select(8, GetInboxHeaderInfo(messageindex))
 	if hasItem == nil then return false end
 	for itemIndex = 1, ATTACHMENTS_MAX_SEND do
-		itemID = select(2, GetInboxItem(messageindex, itemIndex))
-		if itemID ~= nil then
-			itemStackCount = select(8,GetItemInfo(itemID))
-			if itemStackCount and itemStackCount > 1 then return true end
+		local link = GetInboxItemLink(messageindex, itemIndex)
+		if link then
+			local itemID = tonumber(strmatch(link, "item:(%d+)"))
+			if itemID then
+				itemStackCount = select(8, GetItemInfo(itemID))
+				if itemStackCount and itemStackCount > 1 then return true end
+			end
 		end
 	end
 	return false
