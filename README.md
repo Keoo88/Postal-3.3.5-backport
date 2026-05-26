@@ -54,13 +54,19 @@ project.
 ## Installation
 
 1. Download the latest release (or clone this repository).
-2. Extract / copy the `Postal` folder into:
+2. Extract the archive.
+3. **Important:** If you downloaded from GitHub as ZIP, the extracted folder
+   will be named `Postal-3.3.5-backport-master`. Rename it to **`Postal`**.
+   World of Warcraft requires the folder name to match the addon name exactly.
+4. Move the `Postal` folder into:
    ```
    World of Warcraft\Interface\AddOns\Postal
    ```
-3. Make sure the folder is named exactly `Postal` and contains
-   `Postal.toc` at its root.
-4. Restart the game (or `/reload`) and enable **Postal** in the addon list.
+5. Make sure the final path looks like this and contains `Postal.toc`:
+   ```
+   World of Warcraft\Interface\AddOns\Postal\Postal.toc
+   ```
+6. Restart the game (or `/reload`) and enable **Postal** in the addon list.
 
 ## Modules
 
