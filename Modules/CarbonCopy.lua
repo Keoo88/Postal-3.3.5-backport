@@ -6,36 +6,32 @@ Postal_CarbonCopy.description = L["Allows you to copy the contents of a mail."]
 -- luacheck: globals InboxFrame OpenMailScrollFrame
 
 function Postal_CarbonCopy:OnEnable()
-	local module = self or Postal_CarbonCopy
-	module:Hook("OpenMail_Update", true)
+	self:Hook("OpenMail_Update", true)
 	if OpenMailScrollFrame:IsVisible() then
-		module:OpenMail_Update()
+		self:OpenMail_Update()
 	end
 end
 
 -- Disabling modules unregisters all events/hook automatically
 function Postal_CarbonCopy:OnDisable()
-	local module = self or Postal_CarbonCopy
-	module:UnhookAll()
-	if module.button then
-		module.button:Hide()
+	if self.button then
+		self.button:Hide()
 	end
 end
 
 function Postal_CarbonCopy:OpenMail_Update()
-	local module = self or Postal_CarbonCopy
 	if not InboxFrame.openMailID then return end
 	local bodyText, _, _, isInvoice = GetInboxText(InboxFrame.openMailID)
 
 	-- Show or hide the button as necessary
 	if isInvoice or (bodyText and #bodyText > 0) then
-		if module.CreateButton then
-			module:CreateButton()
+		if self.CreateButton then
+			self:CreateButton()
 		end
-		module.button:Show()
+		self.button:Show()
 	else
-		if module.button then
-			module.button:Hide()
+		if self.button then
+			self.button:Hide()
 		end
 	end
 end
@@ -88,12 +84,15 @@ function Postal_CarbonCopy:CopyMail()
 end
 
 function Postal_CarbonCopy:CreateButton()
-	local module = self or Postal_CarbonCopy
 	local button = CreateFrame("Button", nil, OpenMailScrollFrame)
 	button:SetPoint("TOPRIGHT", OpenMailScrollFrame, "TOPRIGHT", 0, 0)
 	button:SetHeight(10)
 	button:SetWidth(10)
-	button:SetNormalTexture(select(3, GetSpellInfo(586)))
+	if select(4, GetBuildInfo()) >= 110000 then
+		button:SetNormalTexture(135994) -- Fade
+	else
+		button:SetNormalTexture(select(3, GetSpellInfo(586)))
+	end
 	button:SetHighlightTexture([[Interface\Buttons\ButtonHilight-Square]])
 	button:SetScript("OnClick", function()
 		Postal_CarbonCopy:CopyMail()
@@ -111,7 +110,7 @@ function Postal_CarbonCopy:CreateButton()
 		self:SetWidth(10)
 		GameTooltip:Hide()
 	end)
-	module.button = button
+	self.button = button
 	OpenMailScrollFrame.PostalCarbonCopyButton = button
-	module.CreateButton = nil -- Kill ourselves
+	self.CreateButton = nil -- Kill ourselves
 end

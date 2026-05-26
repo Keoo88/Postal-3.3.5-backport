@@ -22,6 +22,8 @@ local invFull, invAlmostFull
 local openAllOverride
 local firstMailDaysLeft
 
+
+
 -- Frame to process opening mail
 local updateFrame = CreateFrame("Frame")
 updateFrame:Hide()
@@ -80,7 +82,6 @@ end
 refreshFrame:SetScript("OnEvent", refreshFrame.OnEvent)
 
 function Postal_OpenAll:OnEnable()
-	local module = self or Postal_OpenAll
 	if not button then
 		button = CreateFrame("Button", "PostalOpenAllButton", InboxFrame, "UIPanelButtonTemplate")
 		button:SetWidth(120)
@@ -114,29 +115,28 @@ function Postal_OpenAll:OnEnable()
 		Postal_OpenAllMenuButton:SetFrameLevel(Postal_OpenAllMenuButton:GetFrameLevel() + 1)
 	end
 
-	module:RegisterEvent("MAIL_SHOW")
+	self:RegisterEvent("MAIL_SHOW")
 	-- For enabling after a disable
-	if OpenAllMail then OpenAllMail:Hide() end -- hide Blizzard's Open All button (if it exists)
+	OpenAllMail:Hide() -- hide Blizzard's Open All button
 	button:Show()
 	Postal_OpenAllMenuButton:SetScript("OnHide", Postal_DropDownMenu.HideMenu)
 	Postal_OpenAllMenuButton:Show()
 end
 
 function Postal_OpenAll:OnDisable()
-	local module = self or Postal_OpenAll
-	module:Reset()
-	module:UnregisterAllEvents()
+	self:Reset()
 	button:Hide()
-	if OpenAllMail then OpenAllMail:Show() end -- show Blizzard's Open All button (if it exists)
+	OpenAllMail:Show() -- show Blizzard's Open All button
 	Postal_OpenAllMenuButton:SetScript("OnHide", nil)
 	Postal_OpenAllMenuButton:Hide()
 end
 
 function Postal_OpenAll:MAIL_SHOW()
-	local module = self or Postal_OpenAll
-	module:RegisterEvent("MAIL_CLOSED", "Reset")
-	module:RegisterEvent("PLAYER_LEAVING_WORLD", "Reset")
+	self:RegisterEvent("MAIL_CLOSED", "Reset")
+	self:RegisterEvent("PLAYER_LEAVING_WORLD", "Reset")
 end
+
+
 
 function Postal_OpenAll:OpenAll(isRecursive)
 	refreshFrame:Hide()
@@ -261,7 +261,8 @@ function Postal_OpenAll:ProcessNext()
 		if attachIndex > 0 and not invFull and Postal.db.profile.OpenAll.KeepFreeSpace>0 then
 			local free=0
 			for bag=0,NUM_BAG_SLOTS do
-				local bagFree,bagFam = GetContainerNumFreeSlots(bag)
+				local bagFree, bagFam
+				bagFree, bagFam = GetContainerNumFreeSlots(bag)
 				if bagFam==0 then
 					free = free + bagFree
 				end
@@ -281,11 +282,30 @@ function Postal_OpenAll:ProcessNext()
 			local name, itemID, itemTexture, count, quality, canUse = GetInboxItem(mailIndex, attachIndex)
 			local link = GetInboxItemLink(mailIndex, attachIndex)
 			local itemID = strmatch(link, "item:(%d+)")
-			local stackSize = select(8, GetItemInfo(link))
-			if itemID and stackSize and GetItemCount(itemID) > 0 then
+			local stackSize = select(8, C_Item.GetItemInfo(link))
+			if itemID and stackSize and C_Item.GetItemCount(itemID) > 0 then
 				for bag = 0, NUM_BAG_SLOTS do
-					for slot = 1, GetContainerNumSlots(bag) do
-						local texture2, count2, locked2, quality2, readable2, lootable2, link2 = GetContainerItemInfo(bag, slot)
+					local ContainerNumSlots
+					if Postal.WOWBCClassic then
+						ContainerNumSlots = GetContainerNumSlots(bag)
+					else
+						ContainerNumSlots = C_Container.GetContainerNumSlots(bag)
+					end
+					for slot = 1, ContainerNumSlots do
+						local count2, link2
+						if Postal.WOWBCClassic then
+							count2 = select(2, GetContainerItemInfo(bag, slot))
+							link2 = select(7, GetContainerItemInfo(bag, slot))
+						else
+							if C_Container and C_Container.GetContainerItemInfo(bag, slot) then
+								local itemInfo = C_Container.GetContainerItemInfo(bag, slot)
+								count2 = itemInfo.stackCount
+								link2 = itemInfo.hyperlink
+							else
+								count2 = 0
+								link2 = nil
+							end
+						end
 						if link2 then
 							local itemID2 = strmatch(link2, "item:(%d+)")
 							if itemID == itemID2 and count + count2 <= stackSize then

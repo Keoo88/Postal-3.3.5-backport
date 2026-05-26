@@ -5,7 +5,6 @@
 ## X-Backport: Keoo (WotLK 3.3.5) — backport of v4.3.0 from WotLK Classic
 ## X-Credits: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny aka The_Original_Manbot
 ## X-Category: Mail
-## IconTexture: 133457
 ## Notes: Postal: Enhanced Mailbox support
 ## Notes-ruRU: Postal: Расширенная поддержка почтового ящика
 ## Notes-frFR: Postal: améliorations diverses de l'interface d'envoi/réception de courriers.

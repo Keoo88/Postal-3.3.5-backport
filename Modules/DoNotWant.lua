@@ -69,7 +69,6 @@ function Postal_DoNotWant.Click(self, button, down)
 end
 
 function Postal_DoNotWant:OnEnable()
-	local module = self or Postal_DoNotWant
 	-- Create the icons
 	for i = 1, 7 do
 		local b = _G["MailItem"..i.."ExpireTime"]
@@ -90,13 +89,12 @@ function Postal_DoNotWant:OnEnable()
 		b.returnicon:Show()
 	end
 
-	module:RawHook("InboxFrame_Update", true)
+	self:RawHook("InboxFrame_Update", true)
 end
 
 function Postal_DoNotWant:OnDisable()
-	local module = self or Postal_DoNotWant
-	if module:IsHooked("InboxFrame_Update") then
-		module:Unhook("InboxFrame_Update")
+	if self:IsHooked("InboxFrame_Update") then
+		self:Unhook("InboxFrame_Update")
 	end
 	for i = 1, 7 do
 		_G["MailItem"..i.."ExpireTime"].returnicon:Hide()

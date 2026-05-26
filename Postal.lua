@@ -51,22 +51,34 @@ local defaults = {
 			DisableBlizzardAutoComplete = false,
 			UseAutoComplete = true,
 		},
+		QuickAttach = {
+			EnableBag0 = true,
+			EnableBag1 = true,
+			EnableBag2 = true,
+			EnableBag3 = true,
+			EnableBag4 = true,
+			EnableBag5 = true,
+		},
 	},
 	global = {
 		BlackBook = {
 			alts = {},
+		EnableDefault = false,
 		},
 	},
 }
 local _G = getfenv(0)
 local t = {}
+
 Postal.keepFreeOptions = {0, 1, 2, 3, 5, 10, 15, 20, 25, 30}
 
 -- WotLK 3.3.5 does not have WOW_PROJECT_ID constants
 Postal.WOWRetail = false
 Postal.WOWClassic = false
 Postal.WOWBCClassic = false
-Postal.WOWWotLK = true
+Postal.WOWWotLKClassic = true
+Postal.WOWCataClassic = false
+Postal.WOWMists = false
 
 -- Use a common frame and setup some common functions for the Postal dropdown menus
 local Postal_DropDownMenu = CreateFrame("Frame", "Postal_DropDownMenu")
@@ -143,6 +155,7 @@ local function subjectHoverOut(self)
 end
 
 
+
 ---------------------------
 -- Postal Core Functions --
 ---------------------------
@@ -154,7 +167,15 @@ function Postal:OnInitialize()
 	if not addon.version then addon.version = GetAddOnMetadata("Postal", "Version") end
 
 	-- Initialize database
-	addon.db = LibStub("AceDB-3.0"):New("Postal3DB", defaults)
+	local EnableDefault = false
+	if Postal3DB and Postal3DB.global then
+		EnableDefault = Postal3DB.global.EnableDefault and true or false
+	end
+	if EnableDefault == true then
+		addon.db = LibStub("AceDB-3.0"):New("Postal3DB", defaults, true)
+	else
+		addon.db = LibStub("AceDB-3.0"):New("Postal3DB", defaults)
+	end
 	addon.db.RegisterCallback(addon, "OnProfileChanged", "OnProfileChanged")
 	addon.db.RegisterCallback(addon, "OnProfileCopied", "OnProfileChanged")
 	addon.db.RegisterCallback(addon, "OnProfileReset", "OnProfileChanged")
@@ -211,8 +232,6 @@ end
 
 function Postal:OnModuleEnable_Common()
 	local module = self or Postal
-	-- If the module is enabled with the MailFrame open (at mailbox)
-	-- run the MAIL_SHOW() event function
 	if module.MAIL_SHOW and MailFrame:IsVisible() then
 		module:MAIL_SHOW()
 	end
@@ -268,6 +287,10 @@ end
 
 function Postal.SetChatOutput(dropdownbutton, arg1, arg2, checked)
 	Postal.db.profile.ChatOutput = arg1
+end
+
+function Postal.EnableDefault(dropdownbutton, arg1, arg2, checked)
+	Postal.db.global.EnableDefault = checked
 end
 
 function Postal.ProfileFunc(dropdownbutton, arg1, arg2, checked)
@@ -448,6 +471,14 @@ function Postal.Menu(self, level)
 			info.arg2 = nil
 			UIDropDownMenu_AddButton(info, level)
 
+			info.keepShownOnClick = 1
+			info.isNotRadio = 1
+			info.notCheckable = nil
+			info.text = L["Default"]
+			info.func = Postal.EnableDefault
+			info.checked = Postal.db.global.EnableDefault
+			UIDropDownMenu_AddButton(info, level)
+
 		elseif type(UIDROPDOWNMENU_MENU_VALUE) == "table" and UIDROPDOWNMENU_MENU_VALUE.ModuleMenu then
 			-- Submenus for modules
 			self.levelAdjust = 1
@@ -574,7 +605,6 @@ function Postal.About()
 	tinsert(t, "- Xinhuan (Blackrock/Barthilas US Alliance)")
 	tinsert(t, "")
 	tinsert(t, "WotLK 3.3.5 backport by Keoo (Warmane)")
-	tinsert(t, "")
 	Postal.aboutFrame.editBox:SetText(table.concat(t, "\n"))
 	Postal.aboutFrame:Show()
 	wipe(t) -- For garbage collection

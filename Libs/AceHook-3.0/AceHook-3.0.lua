@@ -9,7 +9,7 @@
 -- make into AceHook.
 -- @class file
 -- @name AceHook-3.0
--- @release $Id: AceHook-3.0.lua 1243 2020-10-18 00:00:19Z nevcairiel $
+-- @release $Id: AceHook-3.0.lua 1284 2022-09-25 09:15:30Z nevcairiel $
 local ACEHOOK_MAJOR, ACEHOOK_MINOR = "AceHook-3.0", 9
 local AceHook, oldminor = LibStub:NewLibrary(ACEHOOK_MAJOR, ACEHOOK_MINOR)
 
@@ -76,8 +76,9 @@ end
 -- Unhooks all hooks when the target disables.
 -- this method should be called by the target manually or by an addon framework
 function AceHook:OnEmbedDisable( target )
-	if not target then return end
-	target:UnhookAll()
+	if target then
+		target:UnhookAll()
+	end
 end
 
 function createHook(self, handler, orig, secure, failsafe)
@@ -196,7 +197,6 @@ function hook(self, obj, method, handler, script, secure, raw, forceSecure, usag
 			registry[self][method] = nil
 		end
 		handlers[uid], actives[uid], scripts[uid] = nil, nil, nil
-		uid = nil
 	end
 
 	local orig

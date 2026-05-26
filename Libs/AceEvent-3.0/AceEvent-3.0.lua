@@ -110,9 +110,10 @@ end
 -- Unregister all events messages etc when the target disables.
 -- this method should be called by the target manually or by an addon framework
 function AceEvent:OnEmbedDisable(target)
-	if not target then return end
-	target:UnregisterAllEvents()
-	target:UnregisterAllMessages()
+	if target then
+		target:UnregisterAllEvents()
+		target:UnregisterAllMessages()
+	end
 end
 
 -- Script to fire blizzard events into the event listeners

@@ -74,8 +74,9 @@ local function printTooMuchMail()
 
 end
 
+
+
 function Postal_Select:OnEnable()
-	local module = self or Postal_Select
 	--create the open button
 	if not openButton then
 		openButton = CreateFrame("Button", "PostalSelectOpenButton", InboxFrame, "UIPanelButtonTemplate")
@@ -108,7 +109,7 @@ function Postal_Select:OnEnable()
 	--now create the checkboxes
 	for i = 1, 7 do
 		if not _G["PostalInboxCB"..i] then
-			local CB = CreateFrame("CheckButton", "PostalInboxCB"..i, _G["MailItem"..i], "OptionsCheckButtonTemplate")
+			local CB = CreateFrame("CheckButton", "PostalInboxCB"..i, _G["MailItem"..i], "InterfaceOptionsCheckButtonTemplate")
 			CB:SetID(i)
 			CB:SetPoint("RIGHT", "MailItem"..i, "LEFT", 1, -5)
 			CB:SetWidth(24)
@@ -122,11 +123,13 @@ function Postal_Select:OnEnable()
 		end
 	end
 
-	module:RawHook("InboxFrame_Update", true)
-	module:RegisterEvent("MAIL_SHOW")
+	self:RawHook("InboxFrame_Update", true)
+	self:RegisterEvent("MAIL_SHOW")
 
 	if InboxTooMuchMail then
+	if InboxTooMuchMail then
 		InboxTooMuchMail.Show = printTooMuchMail
+	end
 		InboxTooMuchMail:Hide()
 	end
 
@@ -139,12 +142,10 @@ function Postal_Select:OnEnable()
 end
 
 function Postal_Select:OnDisable()
-	local module = self or Postal_Select
-	module:Reset()
-	if module:IsHooked("InboxFrame_Update") then
-		module:Unhook("InboxFrame_Update")
+	self:Reset()
+	if self:IsHooked("InboxFrame_Update") then
+		self:Unhook("InboxFrame_Update")
 	end
-	module:UnregisterAllEvents()
 	openButton:Hide()
 	returnButton:Hide()
 	MailItem1:SetPoint("TOPLEFT", "InboxFrame", "TOPLEFT", 28, -80)
@@ -153,16 +154,19 @@ function Postal_Select:OnDisable()
 		_G["MailItem"..i.."ExpireTime"]:SetPoint("TOPRIGHT", "MailItem"..i, "TOPRIGHT", -4, -4)
 		_G["MailItem"..i]:SetWidth(305)
 	end
-	InboxTooMuchMail.Show = nil
+	if InboxTooMuchMail then
+		InboxTooMuchMail.Show = nil
+	end
 end
 
 function Postal_Select:MAIL_SHOW()
-	local module = self or Postal_Select
-	module:RegisterEvent("MAIL_CLOSED", "Reset")
-	module:RegisterEvent("PLAYER_LEAVING_WORLD", "Reset")
-	module:RegisterEvent("MAIL_INBOX_UPDATE")
+	self:RegisterEvent("MAIL_CLOSED", "Reset")
+	self:RegisterEvent("PLAYER_LEAVING_WORLD", "Reset")
+	self:RegisterEvent("MAIL_INBOX_UPDATE")
 	self:BuildUniqueIDs()
 end
+
+
 
 function Postal_Select:ToggleMail(frame)
 	local index = frame:GetID() + (InboxFrame.pageNum - 1) * 7
@@ -333,7 +337,8 @@ function Postal_Select:ProcessNext()
 			if attachIndex > 0 and not invFull and Postal.db.profile.Select.KeepFreeSpace > 0 then
 				local free = 0
 				for bag = 0, NUM_BAG_SLOTS do
-					local bagFree, bagFam = GetContainerNumFreeSlots(bag)
+					local bagFree, bagFam
+						bagFree, bagFam = GetContainerNumFreeSlots(bag)
 					if bagFam == 0 then
 						free = free + bagFree
 					end
@@ -353,11 +358,30 @@ function Postal_Select:ProcessNext()
 				local name, itemID, itemTexture, count, quality, canUse = GetInboxItem(mailIndex, attachIndex)
 				local link = GetInboxItemLink(mailIndex, attachIndex)
 				itemID = strmatch(link, "item:(%d+)")
-				local stackSize = select(8, GetItemInfo(link))
-				if itemID and stackSize and GetItemCount(itemID) > 0 then
+				local stackSize = select(8, C_Item.GetItemInfo(link))
+				if itemID and stackSize and C_Item.GetItemCount(itemID) > 0 then
 					for bag = 0, NUM_BAG_SLOTS do
-						for slot = 1, GetContainerNumSlots(bag) do
-							local texture2, count2, locked2, quality2, readable2, lootable2, link2 = GetContainerItemInfo(bag, slot)
+						local ContainerNumSlots
+						if Postal.WOWBCClassic then
+							ContainerNumSlots = GetContainerNumSlots(bag)
+						else
+							ContainerNumSlots = C_Container.GetContainerNumSlots(bag)
+						end
+						for slot = 1, ContainerNumSlots do
+							local count2, link2
+							if Postal.WOWBCClassic then
+								count2 = select(2, GetContainerItemInfo(bag, slot))
+								link2 = select(7, GetContainerItemInfo(bag, slot))
+							else
+								if C_Container and C_Container.GetContainerItemInfo(bag, slot) then
+									local itemInfo = C_Container.GetContainerItemInfo(bag, slot)
+									count2 = itemInfo.stackCount
+									link2 = itemInfo.hyperlink
+								else
+									count2 = 0
+									link2 = nil
+								end
+							end
 							if link2 then
 								local itemID2 = strmatch(link2, "item:(%d+)")
 								if itemID == itemID2 and count + count2 <= stackSize then
@@ -498,7 +522,7 @@ function Postal_Select:MAIL_INBOX_UPDATE()
 	end
 end
 
-function Postal_Select:Reset(event)
+function Postal_Select:Reset(event, ...)
 	if not self:IsHooked("InboxFrame_Update") then self:RawHook("InboxFrame_Update", true) end
 
 	updateFrame:Hide()
@@ -519,9 +543,7 @@ function Postal_Select:Reset(event)
 		self:UnregisterEvent("PLAYER_LEAVING_WORLD")
 		self:UnregisterEvent("MAIL_INBOX_UPDATE")
 	end
-	if InboxTooMuchMail then
-		InboxTooMuchMail.Show = printTooMuchMail
-	end
+	InboxTooMuchMail.Show = printTooMuchMail
 end
 
 function Postal_Select:UI_ERROR_MESSAGE(event, error_message)
