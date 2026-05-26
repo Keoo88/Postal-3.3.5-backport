@@ -1,12 +1,22 @@
 # Postal — WotLK 3.3.5 backport
 
 <p align="center">
-  <img src="https://www.wowinterface.com/images/info/mailbox.png" alt="Postal icon" width="64" height="64"/>
+  <img src="Postal.png" alt="Postal icon" width="64" height="64"/>
 </p>
 
 <p align="center">
   <b>Enhanced mailbox support for World of Warcraft 3.3.5a (WotLK).</b>
 </p>
+
+<p align="center">
+  <a href="#english">English</a> ·
+  <a href="#russian">Русский</a>
+</p>
+
+---
+
+<a name="english"></a>
+## English
 
 <p align="center">
   <a href="#features">Features</a> ·
@@ -16,9 +26,7 @@
   <a href="#license">License</a>
 </p>
 
----
-
-## About
+### About
 
 **Postal** improves the default mailbox interface with tools for bulk mail
 handling, contacts management, autocomplete, mail forwarding, and more.
@@ -27,7 +35,7 @@ This repository is a **backport of the original Postal addon to WoW 3.3.5a
 (WotLK 3.3.5 client)**. The retail version lives at the author's upstream
 project.
 
-## Features
+### Features
 
 - 📬 **OpenAll** — open all mail of selected types at once (Auction House,
   non-AH with attachments, etc.). Shift-click to override filters.
@@ -51,27 +59,23 @@ project.
 - ⚙ **Profile system** — separate settings per character or shared profiles
   across alts.
 
-## Installation
+### Installation
 
 1. Download the latest release (or clone this repository).
 2. Extract the archive.
-3. **Important:** If you downloaded from GitHub as ZIP, the extracted folder
-   will be named `Postal-3.3.5-backport-master`. Rename it to **`Postal`**.
-   World of Warcraft requires the folder name to match the addon name exactly.
+3. **Important:** GitHub ZIP extracts as `Postal-3.3.5-backport-master`.
+   Rename it to **`Postal`**. WoW requires the folder name to match the addon.
 4. Move the `Postal` folder into:
    ```
    World of Warcraft\Interface\AddOns\Postal
    ```
-5. Make sure the final path looks like this and contains `Postal.toc`:
+5. Verify the final path:
    ```
    World of Warcraft\Interface\AddOns\Postal\Postal.toc
    ```
 6. Restart the game (or `/reload`) and enable **Postal** in the addon list.
 
-## Modules
-
-Postal is split into independent modules. You can disable any module you don't
-need from the Postal settings menu (top-right corner of the mailbox frame).
+### Modules
 
 | Module | Description |
 | --- | --- |
@@ -87,40 +91,133 @@ need from the Postal settings menu (top-right corner of the mailbox frame).
 | TradeBlock | Block trades at mailbox |
 | Wire | Auto-fill subject with coin amount |
 
-## Usage
-
-### Mouse controls
+### Usage
 
 | Input | Action |
 | --- | --- |
-| **Right-click** the Postal icon (top-right of mailbox) | Open settings menu |
-| **Shift-click** an inbox item | Take item/money |
-| **Ctrl-click** an inbox item | Return mail |
+| **Right-click** Postal icon (top-right of mailbox) | Open settings menu |
+| **Shift-click** inbox item | Take item/money |
+| **Ctrl-click** inbox item | Return mail |
 | **Alt-click** inventory item | Attach to outgoing mail |
 | **Shift-click** OpenAll button | Open all mail (ignore filters) |
 
-### Profile system
-
-Each character starts with its own profile. To share settings across alts:
-
-1. Open Postal settings → **Profiles** → **New Profile**
-2. Name it (e.g. "Shared by Alts")
-3. Log your other characters and switch them to the same profile
-
-## Compatibility
+### Compatibility
 
 - Built and tested on **WoW 3.3.5a** (Interface `30300`).
-- All features tested on Warmane.
-- Should work on any WotLK 3.3.5 (a) private server.
+- Tested on Warmane. Should work on any WotLK 3.3.5(a) private server.
 
-## License
+### License
 
-Released under the terms of the [LICENSE](LICENSE.txt) file in this repository.
+Released under the terms of the [LICENSE](LICENSE.txt) file.
 
-## Credits
+### Credits
 
 - Original addon: **Xinhuan**
 - Contributors: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
 - WotLK 3.3.5 backport: **Keoo (Warmane)**
 - Libraries: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
+  AceDB-3.0, AceHook-3.0, AceLocale-3.0
+
+---
+
+<a name="russian"></a>
+## Русский
+
+<p align="center">
+  <a href="#особенности">Особенности</a> ·
+  <a href="#установка">Установка</a> ·
+  <a href="#модули">Модули</a> ·
+  <a href="#использование">Использование</a> ·
+  <a href="#лицензия">Лицензия</a>
+</p>
+
+### Об аддоне
+
+**Postal** расширяет стандартный почтовый интерфейс: массовая работа с
+письмами, список контактов, автодополнение имён, пересылка писем и многое
+другое.
+
+Этот репозиторий — **бэкпорт оригинального Postal под WoW 3.3.5a (WotLK)**.
+
+### Особенности
+
+- 📬 **OpenAll** — открыть все письма выбранных типов разом (Аукцион,
+  не-АХ с вложениями, и т.д.). Shift+клик — игнорировать фильтры.
+- ✅ **Select** — чекбоксы на каждом письме + кнопки массового
+  открытия/возврата. Shift+клик по двум чекбоксам — выбрать диапазон,
+  Ctrl+клик — выбрать все письма от этого отправителя.
+- 📋 **BlackBook** — список контактов рядом с полем «Кому»,
+  автодополнение из Альтов, Недавних, Друзей и Гильдии.
+- ⚡ **Express** — Shift+клик — взять предмет, Ctrl+клик — вернуть письмо,
+  Alt+клик — прикрепить предмет из сумки.
+- 🔗 **CarbonCopy** — копировать содержимое любого письма.
+- 🚫 **DoNotWant** — иконка, показывающая, будет ли письмо возвращено или
+  удалено при истечении срока.
+- 🛡 **TradeBlock** — блокирует торговлю и приглашения в гильдию у почты.
+- 📝 **Wire** — авто-заполнение темы письма суммой денег.
+- 💰 **Rake** — сводка заработанного золота из писем.
+- 📤 **Forward** — переслать письмо другому персонажу.
+- 📎 **QuickAttach** — быстрый доступ к сумкам для прикрепления предметов.
+- ⚙ **Система профилей** — отдельные настройки для каждого персонажа или
+  общий профиль для альтов.
+
+### Установка
+
+1. Скачайте последний релиз (или клонируйте репозиторий).
+2. Распакуйте архив.
+3. **Важно:** GitHub ZIP распаковывается в `Postal-3.3.5-backport-master`.
+   Переименуйте папку в **`Postal`**. WoW требует точного совпадения имени
+   папки с названием аддона.
+4. Переместите папку `Postal` в:
+   ```
+   World of Warcraft\Interface\AddOns\Postal
+   ```
+5. Проверьте итоговый путь:
+   ```
+   World of Warcraft\Interface\AddOns\Postal\Postal.toc
+   ```
+6. Перезагрузите игру (или `/reload`) и включите **Postal** в списке
+   аддонов.
+
+### Модули
+
+| Модуль | Описание |
+| --- | --- |
+| BlackBook | Список контактов, альты, автодополнение |
+| CarbonCopy | Копирование содержимого письма |
+| DoNotWant | Иконки срока давности писем |
+| Express | Горячие клавиши (Shift/Ctrl/Alt+клик) |
+| Forward | Пересылка письма другому персонажу |
+| OpenAll | Массовое открытие писем с фильтрами |
+| QuickAttach | Быстрое прикрепление предметов |
+| Rake | Сводка заработанного золота |
+| Select | Чекбоксы + массовое открытие/возврат |
+| TradeBlock | Блокировка торговли у почты |
+| Wire | Авто-заполнение темы суммой денег |
+
+### Использование
+
+| Действие | Результат |
+| --- | --- |
+| **Правый клик** по иконке Postal (справа сверху у почты) | Меню настроек |
+| **Shift+клик** по письму | Взять предмет/деньги |
+| **Ctrl+клик** по письму | Вернуть письмо |
+| **Alt+клик** по предмету в сумке | Прикрепить к письму |
+| **Shift+клик** по кнопке OpenAll | Открыть все письма (без фильтров) |
+
+### Совместимость
+
+- Собрано и протестировано на **WoW 3.3.5a** (Interface `30300`).
+- Протестировано на Warmane. Должно работать на любом WotLK 3.3.5(a) сервере.
+
+### Лицензия
+
+Распространяется на условиях файла [LICENSE](LICENSE.txt).
+
+### Благодарности
+
+- Оригинальный аддон: **Xinhuan**
+- Участники: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
+- Бэкпорт под WotLK 3.3.5: **Keoo (Warmane)**
+- Библиотеки: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
   AceDB-3.0, AceHook-3.0, AceLocale-3.0
