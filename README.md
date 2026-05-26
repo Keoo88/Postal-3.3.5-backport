@@ -1,11 +1,12 @@
-# Postal — WotLK 3.3.5 backport
+# Postal v3.6.9c — WotLK 3.3.5 backport
 
 <p align="center">
   <img src="Postal.png" alt="Postal icon" width="64" height="64"/>
 </p>
 
 <p align="center">
-  <b>Enhanced mailbox support for World of Warcraft 3.3.5a (WotLK).</b>
+  <b>Enhanced mailbox support for World of Warcraft 3.3.5a (WotLK).</b><br>
+  <i>Backport of Postal v3.6.9c from WotLK Classic.</i>
 </p>
 
 <p align="center">
@@ -31,9 +32,8 @@
 **Postal** improves the default mailbox interface with tools for bulk mail
 handling, contacts management, autocomplete, mail forwarding, and more.
 
-This repository is a **backport of the original Postal addon to WoW 3.3.5a
-(WotLK 3.3.5 client)**. The retail version lives at the author's upstream
-project.
+This repository is a **backport of Postal v3.6.9c from WotLK Classic to WoW
+3.3.5a (WotLK client)**.
 
 ### Features
 
@@ -124,6 +124,15 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ## Русский
 
 <p align="center">
+  <img src="Postal.png" alt="Postal icon" width="64" height="64"/>
+</p>
+
+<p align="center">
+  <b>Расширенная поддержка почтового ящика для WoW 3.3.5a (WotLK).</b><br>
+  <i>Бэкпорт Postal v3.6.9c с WotLK Classic.</i>
+</p>
+
+<p align="center">
   <a href="#особенности">Особенности</a> ·
   <a href="#установка">Установка</a> ·
   <a href="#модули">Модули</a> ·
@@ -137,7 +146,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 письмами, список контактов, автодополнение имён, пересылка писем и многое
 другое.
 
-Этот репозиторий — **бэкпорт оригинального Postal под WoW 3.3.5a (WotLK)**.
+Этот репозиторий — **бэкпорт Postal v3.6.9c с WotLK Classic под WoW 3.3.5a (WotLK)**.
 
 ### Особенности
 

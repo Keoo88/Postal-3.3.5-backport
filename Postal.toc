@@ -1,11 +1,11 @@
 ## Interface: 30300
 ## Title: Postal
-## Version: r436
+## Version: 3.6.9c
 ## X-Build: 436
 ## X-ReleaseDate: 2020-11-17T6:32:04Z
 ## X-Revision: $Revision: 462 $
 ## Author: Xinhuan
-## X-Backport: Keoo (WotLK 3.3.5)
+## X-Backport: Keoo (WotLK 3.3.5) — backport of v3.6.9c from WotLK Classic
 ## X-Credits: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny aka The_Original_Manbot
 ## X-Category: Mail
 ## Notes: Postal: Enhanced Mailbox support
