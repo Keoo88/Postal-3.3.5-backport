@@ -30,7 +30,7 @@ local function CreateQAButton(name, texture, classID, subclassID, toolTip)
 	local ofsxBase, ofsyBase, ofsyGap = 0, 0, 0
 	local scale = 0.73 -- gives good results for classic and retail
 	local TempButton, QAButtonCharName
-	TempButton = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
+	TempButton = CreateFrame("Button", name, MailFrame, "ActionButtonTemplate")
 	local buttonHeight = math.floor(TempButton:GetHeight() + 0.5)
 	TempButton:SetScale(scale)
 	local icon = TempButton.icon or _G[name.."Icon"]
@@ -38,7 +38,7 @@ local function CreateQAButton(name, texture, classID, subclassID, toolTip)
 		icon:SetTexture(texture or "Interface\\Icons\\INV_Misc_QuestionMark")
 	end
 	TempButton:ClearAllPoints()
-	TempButton:SetPoint("TOPLEFT", "MailFrame", "TOPRIGHT", ofsxBase, ofsyBase - (buttonHeight + ofsyGap) * QAButtonPos)
+	TempButton:SetPoint("TOPLEFT", MailFrame, "TOPRIGHT", ofsxBase, ofsyBase - (buttonHeight + ofsyGap) * QAButtonPos)
 	TempButton:RegisterForClicks("AnyUp")
 	TempButton:SetScript("OnClick", function(self, button, down) Postal_QuickAttachButtonClick(button, classID, subclassID) end)
 	TempButton:SetFrameLevel(TempButton:GetFrameLevel() + 1)
