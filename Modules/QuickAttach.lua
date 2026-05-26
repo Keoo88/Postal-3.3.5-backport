@@ -27,9 +27,8 @@ end
 
 -- Create QuickAttach button
 local function CreateQAButton(name, texture, classID, subclassID, toolTip)
-	local ofsxBase, ofsyBase, ofsyGap = -30, -30, 0
-	local scale = 0.73 -- gives good results for classic and retail
-	local TempButton, QAButtonCharName
+	local ofsxBase, ofsyBase, ofsyGap = -40, -20, 0
+
 	TempButton = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
 	local buttonHeight = math.floor(TempButton:GetHeight() + 0.5)
 	TempButton:SetScale(scale)
@@ -71,7 +70,7 @@ local function Postal_QuickAttach_Reposition()
 		local button = _G[QAButtons[i][1]]
 		if button then
 			button:ClearAllPoints()
-			button:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", -30, -30 - (37 + 0) * (i - 1))
+			button:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", -40, -20 - (37 + 0) * (i - 1))
 		end
 	end
 end
