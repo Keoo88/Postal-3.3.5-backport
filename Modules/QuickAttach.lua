@@ -27,7 +27,7 @@ end
 
 -- Create QuickAttach button
 local function CreateQAButton(name, texture, classID, subclassID, toolTip)
-	local ofsxBase, ofsyBase, ofsyGap = 0, 0, 0
+	local ofsxBase, ofsyBase, ofsyGap = -3, -3, 0
 	local scale = 0.73 -- gives good results for classic and retail
 	local TempButton, QAButtonCharName
 	TempButton = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
