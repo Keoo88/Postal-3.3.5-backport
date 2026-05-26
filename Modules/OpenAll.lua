@@ -117,7 +117,7 @@ function Postal_OpenAll:OnEnable()
 
 	self:RegisterEvent("MAIL_SHOW")
 	-- For enabling after a disable
-	OpenAllMail:Hide() -- hide Blizzard's Open All button
+	if OpenAllMail then OpenAllMail:Hide() end -- hide Blizzard's Open All button
 	button:Show()
 	Postal_OpenAllMenuButton:SetScript("OnHide", Postal_DropDownMenu.HideMenu)
 	Postal_OpenAllMenuButton:Show()
@@ -126,7 +126,7 @@ end
 function Postal_OpenAll:OnDisable()
 	self:Reset()
 	button:Hide()
-	OpenAllMail:Show() -- show Blizzard's Open All button
+	if OpenAllMail then OpenAllMail:Show() end -- show Blizzard's Open All button
 	Postal_OpenAllMenuButton:SetScript("OnHide", nil)
 	Postal_OpenAllMenuButton:Hide()
 end
