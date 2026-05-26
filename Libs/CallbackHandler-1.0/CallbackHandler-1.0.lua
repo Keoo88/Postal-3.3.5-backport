@@ -24,9 +24,10 @@ else
 	local xpcall = xpcall
 	local eh = geterrorhandler()
 	dispatchFunc = function(fn, ...)
-		local args = select("#", ...)
-		if args > 0 then
-			xpcall(function() fn(...) end, eh)
+		local numArgs = select("#", ...)
+		if numArgs > 0 then
+			local callArgs = {...}
+			xpcall(function() fn(unpack(callArgs, 1, numArgs)) end, eh)
 		else
 			xpcall(fn, eh)
 		end

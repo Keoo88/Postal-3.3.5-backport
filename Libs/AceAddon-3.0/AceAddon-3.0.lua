@@ -68,9 +68,10 @@ local function safecall(func, ...)
 	-- present execution should continue without hinderance
 	if type(func) == "function" then
 		-- WotLK 3.3.5 (Lua 5.1): xpcall does not pass extra arguments, use a closure
-		local args = select("#", ...)
-		if args > 0 then
-			return xpcall(function() func(...) end, errorhandler)
+		local numArgs = select("#", ...)
+		if numArgs > 0 then
+			local callArgs = {...}
+			return xpcall(function() func(unpack(callArgs, 1, numArgs)) end, errorhandler)
 		else
 			return xpcall(func, errorhandler)
 		end
