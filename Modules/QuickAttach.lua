@@ -32,7 +32,10 @@ local function CreateQAButton(name, texture, classID, subclassID, toolTip)
 	TempButton = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
 	local buttonHeight = math.floor(TempButton:GetHeight() + 0.5)
 	TempButton:SetScale(scale)
-	TempButton.icon:SetTexture(texture) 
+	local icon = TempButton.icon or _G[name.."Icon"]
+	if icon and texture then
+		icon:SetTexture(texture)
+	end
 	TempButton:ClearAllPoints()
 	TempButton:SetPoint("TOPLEFT", "MailFrame", "TOPRIGHT", ofsxBase, ofsyBase - (buttonHeight + ofsyGap) * QAButtonPos)
 	TempButton:RegisterForClicks("AnyUp")
