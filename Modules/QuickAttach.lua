@@ -233,7 +233,24 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 				end
 				if not locked then
 					if useOldAPI then
-						itemID = GetContainerItemID(bagID, slotIndex)
+						local link = GetContainerItemLink(bagID, slotIndex)
+						if link then
+							local _, _, id = strfind(link, "item:(%d+)")
+							itemID = tonumber(id)
+							if itemID then
+								local _, _, _, _, _, _, _, _, _, _, _, iclass, isubclass, ibind = GetItemInfo(link)
+								if iclass and ibind then
+									if ibind ~= 1 then
+										if iclass == classID and (isubclass == subclassID or subclassID == -1) then
+											if SendMailNumberOfFreeSlots() > 0 then
+												PickupContainerItem(bagID, slotIndex)
+												ClickSendMailItemButton()
+											end
+										end
+									end
+								end
+							end
+						end
 					else
 						if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
 							local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
@@ -241,22 +258,18 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 						else
 							itemID = nil
 						end
-					end
-					if itemID then
-						bindType = select(14, GetItemInfo(itemID))
-						local BIND_ON_ACQUIRE = 1
-						if bindType ~= BIND_ON_ACQUIRE then
-							itemclassID = select(12, GetItemInfo(itemID))
-							if itemclassID == classID then
-								itemsubclassID = select(13, GetItemInfo(itemID))
-								if itemsubclassID == subclassID or subclassID == -1 then
+						if itemID then
+							bindType = select(14, GetItemInfo(itemID))
+							local BIND_ON_ACQUIRE = 1
+							if bindType ~= BIND_ON_ACQUIRE then
+								itemclassID = select(12, GetItemInfo(itemID))
+								if itemclassID == classID then
+									itemsubclassID = select(13, GetItemInfo(itemID))
+									if itemsubclassID == subclassID or subclassID == -1 then
 										if SendMailNumberOfFreeSlots() > 0 then
-											if useOldAPI then
-												PickupContainerItem(bagID, slotIndex)
-											else
-												C_Container.PickupContainerItem(bagID, slotIndex)
-											end
+											C_Container.PickupContainerItem(bagID, slotIndex)
 											ClickSendMailItemButton()
+										end
 									end
 								end
 							end
