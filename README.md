@@ -97,6 +97,24 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 | **Alt-click** inventory item | Attach to outgoing mail |
 | **Shift-click** OpenAll button | Open all mail (ignore filters) |
 
+### Changelog (backport)
+
+**v4.3.0** — initial backport (WotLK Classic → 3.3.5a)
+- Replaced all `C_Container.*`/`C_Item.*` calls with old API + version guards
+- Fixed `GetInboxItem` unpacking (5 returns in all WoW versions)
+- Fixed `GetSendMailItem` unpacking (4 returns in WotLK, no `itemID`)
+- Fixed `GetContainerItemID` → `GetContainerItemLink` + `strmatch` in WotLK paths
+- Fixed Express bag button hooks (WotLK XML stores direct function refs — per-button `RawHookScript` instead of global `RawHook`)
+- Fixed Alt+Click auto-send matching (texture+count instead of itemID)
+- Fixed QuickAttach type matching (itemType/subType strings from `GetItemInfo` positions 6/7)
+- Fixed `xpcall` extra-arg bug (Lua 5.1)
+- Fixed Lua 5.1 closure `...` scoping
+- Fixed all nil-global guards
+- Fixed Forward.lua: `MailEditBox.ScrollBox` → `SendMailBodyEditBox` (Cata+ structure absent in 3.3.5)
+- Fixed Wire.lua ruRU locale patterns (double quantifier `%d++`)
+- `select(10, GetContainerItemInfo)` → only 7 returns in WotLK
+- `locked` check as number `== 1`, not boolean
+
 ### Compatibility
 
 - Built and tested on **WoW 3.3.5a** (Interface `30300`).
@@ -204,6 +222,24 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 | **Ctrl+клик** по письму | Вернуть письмо |
 | **Alt+клик** по предмету в сумке | Прикрепить к письму |
 | **Shift+клик** по кнопке OpenAll | Открыть все письма (без фильтров) |
+
+### Список изменений (бэкпорт)
+
+**v4.3.0** — первый бэкпорт (WotLK Classic → 3.3.5a)
+- Все `C_Container.*`/`C_Item.*` заменены на старый API + guards
+- Исправлена распаковка `GetInboxItem` (5 значений во всех версиях WoW)
+- Исправлена распаковка `GetSendMailItem` (4 значения в WotLK, нет `itemID`)
+- `GetContainerItemID` → `GetContainerItemLink` + `strmatch` в WotLK
+- Исправлены хуки кнопок сумок (WotLK XML хранит прямые ссылки — `RawHookScript` на каждую кнопку)
+- Исправлено авто-отправление Alt+Click (сравнение texture+count вместо itemID)
+- Исправлено QuickAttach сопоставление типов (itemType/subType из `GetItemInfo` позиции 6/7)
+- Исправлен баг `xpcall` с лишними аргументами (Lua 5.1)
+- Исправлена область видимости `...` в замыканиях Lua 5.1
+- Исправлены все nil-global guards
+- Исправлен Forward.lua: `MailEditBox.ScrollBox` → `SendMailBodyEditBox`
+- Исправлены ruRU паттерны в Wire.lua (двойной квантификатор `%d++`)
+- `select(10, GetContainerItemInfo)` → всего 7 значений в WotLK
+- `locked` проверка как число `== 1`, не boolean
 
 ### Совместимость
 
