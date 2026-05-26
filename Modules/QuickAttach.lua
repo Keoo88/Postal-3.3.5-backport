@@ -222,7 +222,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 			end
 			for slotIndex = 1, numberOfSlots, 1 do
 				if useOldAPI then
-					locked = select(3, GetContainerItemInfo(bagID, slotIndex))
+					locked = select(3, GetContainerItemInfo(bagID, slotIndex)) == 1
 				else
 					if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
 						local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
@@ -231,7 +231,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 						locked = false
 					end
 				end
-				if locked == false then
+				if not locked then
 					if useOldAPI then
 						itemID = GetContainerItemID(bagID, slotIndex)
 					else

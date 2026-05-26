@@ -171,7 +171,7 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 		if not itemid then return end
 		local itemlocked
 		if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-			itemlocked = select(3, GetContainerItemInfo(bag,slot))
+			itemlocked = select(3, GetContainerItemInfo(bag,slot)) == 1
 		else
 			if C_Container and C_Container.GetContainerItemInfo(bag,slot) then
 				local itemInfo = C_Container.GetContainerItemInfo(bag,slot)
@@ -211,7 +211,7 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 						end
 						local itemlocked2
 						if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-							itemlocked2 = select(3, GetContainerItemInfo(b,s))
+							itemlocked2 = select(3, GetContainerItemInfo(b,s)) == 1
 						else
 							if C_Container and C_Container.GetContainerItemInfo(b,s) then
 								local itemInfo = C_Container.GetContainerItemInfo(b,s)
@@ -243,7 +243,7 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 								ClickSendMailItemButton()
 								local itemlocked3
 								if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-									itemlocked3 = select(3, GetContainerItemInfo(b,s))
+									itemlocked3 = select(3, GetContainerItemInfo(b,s)) == 1
 								else
 									if C_Container and C_Container.GetContainerItemInfo(b,s) then
 										local itemInfo = C_Container.GetContainerItemInfo(b,s)
