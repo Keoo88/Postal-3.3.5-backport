@@ -155,12 +155,10 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 			C_Container.PickupContainerItem(bag, slot)
 		end
 		ClickSendMailItemButton()
-		local clickedItemID = GetContainerItemID(bag, slot)
 		if Postal.db.profile.Express.AutoSend then
 			for i = 1, ATTACHMENTS_MAX_SEND do
-				-- get info about the attachment
-				local itemName, itemID, itemTexture, stackCount, quality = GetSendMailItem(i)
-				if SendMailNameEditBox:GetText() ~= "" and clickedItemID == itemID then
+				local itemName, itemTexture, stackCount = GetSendMailItem(i)
+				if SendMailNameEditBox:GetText() ~= "" and texture == itemTexture and count == stackCount then
 					SendMailFrame_SendMail()
 				end
 			end
@@ -168,7 +166,10 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 	elseif button == "LeftButton" and IsControlKeyDown() and SendMailFrame:IsVisible() and not CursorHasItem() then
 		local itemid
 		if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-			itemid = GetContainerItemID(bag, slot)
+			local link = GetContainerItemLink(bag, slot)
+			if link then
+				itemid = tonumber(strmatch(link, "(%d+)"))
+			end
 		else
 			itemid = C_Container.GetContainerItemID(bag, slot)
 		end
@@ -209,7 +210,10 @@ function Postal_Express:ContainerFrameItemButtonOnModifiedClick(bag, slot, butto
 					for s = 1, numberOfSlots do
 						local tid
 						if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-							tid = GetContainerItemID(b, s)
+							local link = GetContainerItemLink(b, s)
+							if link then
+								tid = tonumber(strmatch(link, "(%d+)"))
+							end
 						else
 							tid = C_Container.GetContainerItemID(b, s)
 						end
