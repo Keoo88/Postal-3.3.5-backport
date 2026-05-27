@@ -38,7 +38,7 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 ### Features
 
 - 📬 **OpenAll** — open mail of selected types (AH, with attachments, etc.). Shift-click — no filters.
-- ✅ **Select** — checkboxes on mail items, bulk open/return. Shift-click — range, Ctrl-click — all from sender.
+- ✅ **Select** — checkboxes, bulk open/return. Shift — range, Ctrl — all from sender.
 - 📋 **BlackBook** — contacts next to To: field, autocomplete from Alts, Friends, Guild.
 - ⚡ **Express** — Shift-click — take, Ctrl-click — return, Alt-click — attach from bags.
 - 🔗 **CarbonCopy** — copy mail contents.
@@ -156,7 +156,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ### Особенности
 
 - 📬 **OpenAll** — открыть письма выбранных типов (Аукцион, с вложениями и т.д.). Shift+клик — без фильтров.
-- ✅ **Select** — чекбоксы на письмах, массовое открытие/возврат. Shift+клик — диапазон, Ctrl+клик — все от отправителя.
+- ✅ **Select** — чекбоксы, массовое открытие/возврат. Shift — диапазон, Ctrl — всё от отправителя.
 - 📋 **BlackBook** — контакты у поля «Кому», автодополнение из Альтов, Друзей, Гильдии.
 - ⚡ **Express** — Shift+клик — взять, Ctrl+клик — вернуть, Alt+клик — прикрепить из сумки.
 - 🔗 **CarbonCopy** — копировать содержимое письма.
