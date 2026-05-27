@@ -226,20 +226,18 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 		bagIDmax = bagIDmax + NUM_REAGENTBAG_FRAMES
 	end
 	for bagID = 0, bagIDmax, 1 do
-		local bagEnabled = (bagID == 0) and Postal.db.profile.QuickAttach.EnableBag0 or
+		if (bagID == 0) and Postal.db.profile.QuickAttach.EnableBag0 or
 			(bagID == 1) and Postal.db.profile.QuickAttach.EnableBag1 or
 			(bagID == 2) and Postal.db.profile.QuickAttach.EnableBag2 or
 			(bagID == 3) and Postal.db.profile.QuickAttach.EnableBag3 or
 			(bagID == 4) and Postal.db.profile.QuickAttach.EnableBag4 or
 			(bagID == 5) and Postal.db.profile.QuickAttach.EnableBag5
-		DEFAULT_CHAT_FRAME:AddMessage("DBG QA: bag="..bagID.." enabled="..tostring(bagEnabled))
-		if bagEnabled then
+		then
 			if useOldAPI then
 				numberOfSlots = GetContainerNumSlots(bagID)
 			else
 				numberOfSlots = C_Container.GetContainerNumSlots(bagID)
 			end
-			DEFAULT_CHAT_FRAME:AddMessage("DBG QA: bag="..bagID.." slots="..tostring(numberOfSlots))
 			for slotIndex = 1, numberOfSlots, 1 do
 				if useOldAPI then
 					locked = select(3, GetContainerItemInfo(bagID, slotIndex)) == 1
@@ -256,11 +254,10 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 						local link = GetContainerItemLink(bagID, slotIndex)
 						if link then
 							itemID = tonumber(strmatch(link, "(%d+)"))
-							DEFAULT_CHAT_FRAME:AddMessage("DBG QA: bag="..bagID.." slot="..slotIndex.." itemID="..tostring(itemID))
 							if itemID then
-								local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
-								if itemID == 41511 then
-									DEFAULT_CHAT_FRAME:AddMessage("DBG QA 41511: itemType="..tostring(itemType).." itemSubType="..tostring(itemSubType).." WotLKClassName="..tostring(WotLKClassName).." classID="..tostring(classID).." subclassID="..tostring(subclassID))
+								local itemName, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+								if itemName == "Bolt of Imbued Frostweave" or itemName == "Bolt of Imbued Frostweave Bolt" or (itemName and (strfind(itemName, "Frostweave") or strfind(itemName, "Bolt"))) then
+									DEFAULT_CHAT_FRAME:AddMessage("DBG QA FOUND: itemID="..itemID.." name="..tostring(itemName).." bag="..bagID.." slot="..slotIndex)
 								end
 								if itemType and WotLKClassName and itemType == WotLKClassName then
 									if subclassID == -1 then
