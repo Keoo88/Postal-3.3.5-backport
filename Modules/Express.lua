@@ -10,13 +10,13 @@ local _G = getfenv(0)
 local processingBagClick = false
 
 function Postal_Express:MAIL_SHOW()
-	Postal:Print("DBG: MAIL_SHOW fired")
+	DEFAULT_CHAT_FRAME:AddMessage("DBG: MAIL_SHOW fired")
 	-- Debug: check what bag frames/buttons exist
 	for bag = 0, NUM_BAG_FRAMES do
 		local frame = _G["ContainerFrame"..(bag+1)]
 		if frame then
 			local btn1 = _G["ContainerFrame"..(bag+1).."Item1"]
-			Postal:Print("DBG: ContainerFrame"..(bag+1).." exists, Item1="..tostring(btn1))
+			DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrame"..(bag+1).." exists, Item1="..tostring(btn1))
 		end
 	end
 	if Postal.db.profile.Express.EnableAltClick then
@@ -25,11 +25,11 @@ function Postal_Express:MAIL_SHOW()
 		end
 		if not self:IsHooked("PickupContainerItem") then
 			self:RawHook("PickupContainerItem", true)
-			Postal:Print("DBG: PickupContainerItem hooked")
+			DEFAULT_CHAT_FRAME:AddMessage("DBG: PickupContainerItem hooked")
 		end
 		if not self:IsHooked("ContainerFrameItemButton_OnClick") then
 			self:RawHook("ContainerFrameItemButton_OnClick", true)
-			Postal:Print("DBG: ContainerFrameItemButton_OnClick hooked")
+			DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrameItemButton_OnClick hooked")
 		end
 		-- Hook Blizzard bag buttons (ContainerFrame1Item1 through ContainerFrame5ItemN)
 		for bag = 0, NUM_BAG_FRAMES do
@@ -39,7 +39,7 @@ function Postal_Express:MAIL_SHOW()
 					local btn = _G["ContainerFrame"..(bag+1).."Item"..slot]
 					if btn and not self:IsHooked(btn, "OnClick") then
 						self:RawHookScript(btn, "OnClick", function(button, btnName, ...)
-							Postal:Print("DBG: Per-button OnClick bag="..bag.." slot="..slot.." btn="..tostring(btnName).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+							DEFAULT_CHAT_FRAME:AddMessage("DBG: Per-button OnClick bag="..bag.." slot="..slot.." btn="..tostring(btnName).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 							return self.hooks[button].OnClick(button, btnName, ...)
 						end)
 					end
@@ -176,11 +176,11 @@ function Postal_Express:PickupContainerItem(bag, slot)
 
 	if not SendMailFrame:IsVisible() then
 		self.hooks["PickupContainerItem"](bag, slot)
-		Postal:Print("DBG: SendMailFrame not visible")
+		DEFAULT_CHAT_FRAME:AddMessage("DBG: SendMailFrame not visible bag="..tostring(bag).." slot="..tostring(slot))
 		return
 	end
 
-	Postal:Print("DBG: PickupContainerItem called bag="..tostring(bag).." slot="..tostring(slot).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+	DEFAULT_CHAT_FRAME:AddMessage("DBG: PickupContainerItem called bag="..tostring(bag).." slot="..tostring(slot).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 
 	local texture, count, itemid, itemlocked
 	if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
@@ -195,10 +195,10 @@ function Postal_Express:PickupContainerItem(bag, slot)
 
 	self.hooks["PickupContainerItem"](bag, slot)
 
-	Postal:Print("DBG: texture="..tostring(texture).." count="..tostring(count).." itemid="..tostring(itemid).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+	DEFAULT_CHAT_FRAME:AddMessage("DBG: texture="..tostring(texture).." count="..tostring(count).." itemid="..tostring(itemid).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 
 	if IsAltKeyDown() and Postal.db.profile.Express.EnableAltClick and texture then
-		Postal:Print("DBG: Alt+Click detected, attaching")
+		DEFAULT_CHAT_FRAME:AddMessage("DBG: Alt+Click detected, attaching")
 		ClickSendMailItemButton()
 		if Postal.db.profile.Express.AutoSend and SendMailNameEditBox:GetText() ~= "" then
 			for i = 1, ATTACHMENTS_MAX_SEND do
@@ -209,7 +209,7 @@ function Postal_Express:PickupContainerItem(bag, slot)
 			end
 		end
 	elseif IsControlKeyDown() and Postal.db.profile.Express.BulkSend and itemid then
-		Postal:Print("DBG: Ctrl+Click detected, bulk send")
+		DEFAULT_CHAT_FRAME:AddMessage("DBG: Ctrl+Click detected, bulk send")
 		local itemq, _,_, itemc, itemsc, _, itemes = select(3,GetItemInfo(itemid))
 		itemes = itemes and #itemes > 0
 		if itemq and itemc then
@@ -316,7 +316,7 @@ end
 -- Hook on ContainerFrameItemButton_OnClick — catches clicks from XML bag buttons
 -- and any code that calls this global function directly
 function Postal_Express:ContainerFrameItemButton_OnClick(frame, button, ...)
-	Postal:Print("DBG: ContainerFrameItemButton_OnClick fired button="..tostring(button).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+	DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrameItemButton_OnClick fired button="..tostring(button).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 	return self.hooks["ContainerFrameItemButton_OnClick"](frame, button, ...)
 end
 
