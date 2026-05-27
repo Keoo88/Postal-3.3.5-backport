@@ -11,11 +11,17 @@ local processingBagClick = false
 
 function Postal_Express:MAIL_SHOW()
 	DEFAULT_CHAT_FRAME:AddMessage("DBG: MAIL_SHOW fired")
-	-- Check for known ElvUI bag frame globals
-	for _, name in ipairs({"ElvUI_ContainerFrame", "ElvUIBagFrame", "ElvUI_BagFrame", "ElvUIContainerFrame", "ElvUI_Bag"}) do
-		local f = _G[name]
-		if f then
-			DEFAULT_CHAT_FRAME:AddMessage("DBG: Found ElvUI frame: "..name.." "..tostring(f))
+	-- Scan ElvUI bag frame children for button-like frames
+	local elvBag = _G["ElvUI_ContainerFrame"]
+	if elvBag then
+		local kids = {elvBag:GetChildren()}
+		DEFAULT_CHAT_FRAME:AddMessage("DBG: ElvUI_ContainerFrame has "..#kids.." children")
+		for i, child in ipairs(kids) do
+			local objType = child:GetObjectType()
+			local name = child:GetName() or "(unnamed)"
+			if objType == "Button" then
+				DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..name.." type="..objType)
+			end
 		end
 	end
 	if Postal.db.profile.Express.EnableAltClick then
