@@ -14,32 +14,22 @@ function Postal_Express:MAIL_SHOW()
 	-- Scan ElvUI bag frame children for button-like frames
 	local elvBag = _G["ElvUI_ContainerFrame"]
 	if elvBag then
-		local kids = {elvBag:GetChildren()}
-		DEFAULT_CHAT_FRAME:AddMessage("DBG: ElvUI_ContainerFrame has "..#kids.." children")
-		for i, child in ipairs(kids) do
-			local objType = child:GetObjectType()
-			local name = child:GetName() or "(unnamed)"
-			-- Check for bag buttons at any depth
-			local function scanFrames(f, depth, prefix)
-				if depth > 4 then return end
-				local myName = f:GetName() or "(unnamed)"
-				local myType = f:GetObjectType()
-				if depth == 1 then
-					DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..myName.." type="..myType)
-				end
-				if myType == "Button" then
-					local bag, slot = f.bag, f:GetID()
-					if bag ~= nil or slot ~= nil then
-						DEFAULT_CHAT_FRAME:AddMessage("DBG:    "..prefix.."Button: "..myName.." bag="..tostring(bag).." slot="..tostring(slot).." id="..tostring(f:GetID()))
-					end
-				end
-				local fKids = {f:GetChildren()}
-				for j, fk in ipairs(fKids) do
-					scanFrames(fk, depth + 1, prefix.."  ")
-				end
+		local function scanFrames(f, depth, limit)
+			if depth > limit then return end
+			local myName = f:GetName() or "(unnamed)"
+			local myType = f:GetObjectType()
+			if depth >= 3 and myType == "Button" then
+				local bag, slot = f.bag, f:GetID()
+				local parent = f:GetParent()
+				local pName = parent and (parent:GetName() or "(unnamed)") or "nil"
+				DEFAULT_CHAT_FRAME:AddMessage("DBG:  depth="..depth.." btn="..myName.." par="..pName.." bag="..tostring(bag).." slot="..tostring(slot))
 			end
-			scanFrames(child, 1, "  ")
+			local fKids = {f:GetChildren()}
+			for _, fk in ipairs(fKids) do
+				scanFrames(fk, depth + 1, limit)
+			end
 		end
+		scanFrames(elvBag, 1, 6)
 	end
 	if Postal.db.profile.Express.EnableAltClick then
 		if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
