@@ -158,7 +158,7 @@ function Postal_Express:ContainerFrameItemButton_OnModifiedClick(this, button, .
 		elseif IsControlKeyDown() and Postal.db.profile.Express.BulkSend then
 			local link = GetContainerItemLink(bag, slot)
 			if link then
-				local itemid = tonumber(strmatch(link, "(%d+)"))
+				local itemid = tonumber(strmatch(link, "item:(%d+)"))
 				if itemid then
 					local itemlocked = select(3, GetContainerItemInfo(bag, slot)) == 1
 					local itemq, _,_, itemc, itemsc, _, itemes = select(3,GetItemInfo(itemid))
@@ -203,7 +203,7 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 				if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
 					local link = GetContainerItemLink(b, s)
 					if link then
-						tid = tonumber(strmatch(link, "(%d+)"))
+						tid = tonumber(strmatch(link, "item:(%d+)"))
 					end
 				else
 					tid = C_Container.GetContainerItemID(b, s)

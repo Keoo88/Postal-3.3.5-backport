@@ -225,8 +225,6 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 	if Postal.WOWRetail then
 		bagIDmax = bagIDmax + NUM_REAGENTBAG_FRAMES
 	end
-	local _, _, _, _, _, infType, infSubType = GetItemInfo(41511)
-	DEFAULT_CHAT_FRAME:AddMessage("DBG QA 41511 exists: "..tostring(infType).."/"..tostring(infSubType))
 	for bagID = 0, bagIDmax, 1 do
 		if (bagID == 0) and Postal.db.profile.QuickAttach.EnableBag0 or
 			(bagID == 1) and Postal.db.profile.QuickAttach.EnableBag1 or
@@ -255,12 +253,9 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 					if useOldAPI then
 						local link = GetContainerItemLink(bagID, slotIndex)
 						if link then
-							itemID = tonumber(strmatch(link, "(%d+)"))
+							itemID = tonumber(strmatch(link, "item:(%d+)"))
 							if itemID then
 								local itemName, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
-								if itemName == "Bolt of Imbued Frostweave" or itemName == "Bolt of Imbued Frostweave Bolt" or (itemName and (strfind(itemName, "Frostweave") or strfind(itemName, "Bolt"))) then
-									DEFAULT_CHAT_FRAME:AddMessage("DBG QA FOUND: itemID="..itemID.." name="..tostring(itemName).." bag="..bagID.." slot="..slotIndex)
-								end
 								if itemType and WotLKClassName and itemType == WotLKClassName then
 									if subclassID == -1 then
 										if SendMailNumberOfFreeSlots() > 0 then
@@ -269,7 +264,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 										end
 									else
 										for _, btn in ipairs(QAButtons) do
-											if btn[3] == classID and btn[4] == subclassID and itemSubType == btn[5] then
+											if itemSubType == btn[5] then
 												if SendMailNumberOfFreeSlots() > 0 then
 													PickupContainerItem(bagID, slotIndex)
 													ClickSendMailItemButton()
