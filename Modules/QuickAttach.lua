@@ -12,6 +12,7 @@ local QAButtonPos = 0 -- Needed due to lack of static variables in lua
 local QAButtonDialogInfo = "" -- Name|classID|subclassID
 local QAButtons
 local WotLKClassName -- cached localized class name (e.g. "Trade Goods")
+local WotLKSubTypeNames -- cached localized sub-type names per subclassID
 
 -- Set a button's GameTooltip
 local function SetQAButtonGameTooltip(button, toolTip)
@@ -82,6 +83,33 @@ function Postal_QuickAttach:OnEnable()
 		QAButtons = {}
 		if Postal.WOWWotLKClassic then
 			WotLKClassName = select(6, GetItemInfo(34054)) -- Infinite Dust → "Trade Goods" (localized)
+			WotLKSubTypeNames = {}
+			local refs = {
+				[5]  = {2996, 4339, 33470, 41511}, -- Cloth
+				[6]  = {2318, 4234, 4304, 21887}, -- Leather
+				[7]  = {2770, 2771, 2772, 23424, 36909, 36913}, -- Metal & Stone
+				[8]  = {31737, 43015, 43013, 33454, 35953}, -- Cooking
+				[9]  = {33614, 37921, 36901, 36904, 36905}, -- Herb
+				[12] = {34054, 34055, 34057, 22445, 22573, 16204}, -- Enchanting
+				[4]  = {20824, 32227, 32228, 32229, 32230, 32231, 36917, 36920, 36921}, -- Jewelcrafting
+				[1]  = {23783, 23784, 23785, 23786, 23787, 32396}, -- Parts
+				[10] = {22572, 22574, 22575, 22576, 22577, 22578}, -- Elemental
+				[3]  = {32399, 32400, 32401, 32402, 32403}, -- Devices
+				[2]  = {4364, 4371, 7191, 10648, 18631}, -- Explosives
+				[11] = {4289, 4305, 6260, 6261, 10305, 10306}, -- Other
+				[13] = {39690, 39691, 36783, 35625, 35627}, -- Materials
+				[14] = {33803, 33802, 29736, 38848, 33809}, -- Armor Enchantment
+				[15] = {33804, 38973, 38974, 38978, 38979}, -- Weapon Enchantment
+			}
+			for scID, itemIDs in pairs(refs) do
+				for _, itemID in ipairs(itemIDs) do
+					local subType = select(7, GetItemInfo(itemID))
+					if subType then
+						WotLKSubTypeNames[scID] = subType
+						break
+					end
+				end
+			end
 		end
 		if Postal.WOWClassic == true then
 			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(2018), 7, 0, L["Trade Goods"]})
@@ -215,6 +243,35 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 	local useOldAPI = Postal.WOWBCClassic or Postal.WOWWotLKClassic
 	if useOldAPI and not WotLKClassName then
 		WotLKClassName = select(6, GetItemInfo(34054))
+		if not WotLKSubTypeNames and Postal.WOWWotLKClassic then
+			WotLKSubTypeNames = {}
+			local refs = {
+				[5]  = {2996, 4339, 33470, 41511},
+				[6]  = {2318, 4234, 4304, 21887},
+				[7]  = {2770, 2771, 2772, 23424, 36909, 36913},
+				[8]  = {31737, 43015, 43013, 33454, 35953},
+				[9]  = {33614, 37921, 36901, 36904, 36905},
+				[12] = {34054, 34055, 34057, 22445, 22573, 16204},
+				[4]  = {20824, 32227, 32228, 32229, 32230, 32231, 36917, 36920, 36921},
+				[1]  = {23783, 23784, 23785, 23786, 23787, 32396},
+				[10] = {22572, 22574, 22575, 22576, 22577, 22578},
+				[3]  = {32399, 32400, 32401, 32402, 32403},
+				[2]  = {4364, 4371, 7191, 10648, 18631},
+				[11] = {4289, 4305, 6260, 6261, 10305, 10306},
+				[13] = {39690, 39691, 36783, 35625, 35627},
+				[14] = {33803, 33802, 29736, 38848, 33809},
+				[15] = {33804, 38973, 38974, 38978, 38979},
+			}
+			for scID, itemIDs in pairs(refs) do
+				for _, itemID in ipairs(itemIDs) do
+					local subType = select(7, GetItemInfo(itemID))
+					if subType then
+						WotLKSubTypeNames[scID] = subType
+						break
+					end
+				end
+			end
+		end
 	end
 	local name = Postal_QuickAttachGetQAButtonCharName(classID, subclassID)
 	if name ~= "" then
@@ -264,7 +321,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 										end
 									else
 										for _, btn in ipairs(QAButtons) do
-											if btn[3] == classID and btn[4] == subclassID and itemSubType == btn[5] then
+											if btn[3] == classID and btn[4] == subclassID and itemSubType == (WotLKSubTypeNames[subclassID] or btn[5]) then
 												if SendMailNumberOfFreeSlots() > 0 then
 													PickupContainerItem(bagID, slotIndex)
 													ClickSendMailItemButton()
