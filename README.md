@@ -37,18 +37,18 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 
 ### Features
 
-- 📬 **OpenAll** — open all mail of selected types at once (AH, non-AH with attachments, etc.). Shift-click — override filters.
-- ✅ **Select** — checkboxes on every inbox item with bulk open/return. Shift-click — select range, Ctrl-click — select all from sender.
-- 📋 **BlackBook** — contact list next to To: field, autocomplete from Alts, Recent, Friends, Guild.
-- ⚡ **Express** — Shift-click — take items, Ctrl-click — return mail, Alt-click — attach inventory items.
-- 🔗 **CarbonCopy** — copy any mail contents.
-- 🚫 **DoNotWant** — shows if mail will be returned or deleted on expiry.
+- 📬 **OpenAll** — open mail of selected types (AH, with attachments, etc.). Shift-click — no filters.
+- ✅ **Select** — checkboxes on mail items, bulk open/return. Shift-click — range, Ctrl-click — all from sender.
+- 📋 **BlackBook** — contacts next to To: field, autocomplete from Alts, Friends, Guild.
+- ⚡ **Express** — Shift-click — take, Ctrl-click — return, Alt-click — attach from bags.
+- 🔗 **CarbonCopy** — copy mail contents.
+- 🚫 **DoNotWant** — shows return or delete on expiry.
 - 🛡 **TradeBlock** — block trades and guild invites at mailbox.
 - 📝 **Wire** — auto-fill subject with coin amount.
-- 💰 **Rake** — gold earned summary from opened mail.
+- 💰 **Rake** — gold summary from opened mail.
 - 📤 **Forward** — forward mail to another character.
-- 📎 **QuickAttach** — quick-attach trade items; set default recipient per type.
-- ⚙ **Profile system** — per-character settings or shared profiles.
+- 📎 **QuickAttach** — quick-attach trade items; default recipient per type.
+- ⚙ **Profile system** — per-character or shared profiles.
 
 ### Installation
 
@@ -155,18 +155,18 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 
 ### Особенности
 
-- 📬 **OpenAll** — открыть все письма выбранных типов разом (Аукцион, не-АХ с вложениями и т.д.). Shift+клик — игнорировать фильтры.
-- ✅ **Select** — чекбоксы на каждом письме + кнопки массового открытия/возврата. Shift+клик по двум чекбоксам — выбрать диапазон, Ctrl+клик — выбрать все письма от этого отправителя.
-- 📋 **BlackBook** — список контактов рядом с полем «Кому», автодополнение из Альтов, Недавних, Друзей и Гильдии.
-- ⚡ **Express** — Shift+клик — взять предмет, Ctrl+клик — вернуть письмо, Alt+клик — прикрепить предмет из сумки.
-- 🔗 **CarbonCopy** — копировать содержимое любого письма.
-- 🚫 **DoNotWant** — иконка возврата/удаления письма при истечении срока.
-- 🛡 **TradeBlock** — блокировка торговли и приглашений в гильдию у почты.
-- 📝 **Wire** — авто-заполнение темы письма суммой денег.
-- 💰 **Rake** — сводка заработанного золота из писем.
+- 📬 **OpenAll** — открыть письма выбранных типов (Аукцион, с вложениями и т.д.). Shift+клик — без фильтров.
+- ✅ **Select** — чекбоксы на письмах, массовое открытие/возврат. Shift+клик — диапазон, Ctrl+клик — все от отправителя.
+- 📋 **BlackBook** — контакты у поля «Кому», автодополнение из Альтов, Друзей, Гильдии.
+- ⚡ **Express** — Shift+клик — взять, Ctrl+клик — вернуть, Alt+клик — прикрепить из сумки.
+- 🔗 **CarbonCopy** — копировать содержимое письма.
+- 🚫 **DoNotWant** — иконка: возврат или удаление при истечении.
+- 🛡 **TradeBlock** — блокировка торговли и гильдий у почты.
+- 📝 **Wire** — авто-заполнение темы суммой денег.
+- 💰 **Rake** — сводка золота из писем.
 - 📤 **Forward** — переслать письмо другому персонажу.
-- 📎 **QuickAttach** — быстрый доступ к сумкам для прикрепления предметов.
-- ⚙ **Система профилей** — отдельные настройки для персонажа или общий профиль.
+- 📎 **QuickAttach** — быстрый доступ к сумкам, прикрепление предметов.
+- ⚙ **Система профилей** — настройки на персонажа или общий профиль.
 
 ### Установка
 
