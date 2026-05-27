@@ -11,12 +11,11 @@ local processingBagClick = false
 
 function Postal_Express:MAIL_SHOW()
 	DEFAULT_CHAT_FRAME:AddMessage("DBG: MAIL_SHOW fired")
-	-- Debug: check what bag frames/buttons exist
-	for bag = 0, NUM_BAG_FRAMES do
-		local frame = _G["ContainerFrame"..(bag+1)]
-		if frame then
-			local btn1 = _G["ContainerFrame"..(bag+1).."Item1"]
-			DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrame"..(bag+1).." exists, Item1="..tostring(btn1))
+	-- Check for known ElvUI bag frame globals
+	for _, name in ipairs({"ElvUI_ContainerFrame", "ElvUIBagFrame", "ElvUI_BagFrame", "ElvUIContainerFrame", "ElvUI_Bag"}) do
+		local f = _G[name]
+		if f then
+			DEFAULT_CHAT_FRAME:AddMessage("DBG: Found ElvUI frame: "..name.." "..tostring(f))
 		end
 	end
 	if Postal.db.profile.Express.EnableAltClick then
@@ -26,25 +25,6 @@ function Postal_Express:MAIL_SHOW()
 		if not self:IsHooked("PickupContainerItem") then
 			self:RawHook("PickupContainerItem", true)
 			DEFAULT_CHAT_FRAME:AddMessage("DBG: PickupContainerItem hooked")
-		end
-		if not self:IsHooked("ContainerFrameItemButton_OnClick") then
-			self:RawHook("ContainerFrameItemButton_OnClick", true)
-			DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrameItemButton_OnClick hooked")
-		end
-		-- Hook Blizzard bag buttons (ContainerFrame1Item1 through ContainerFrame5ItemN)
-		for bag = 0, NUM_BAG_FRAMES do
-			local frame = _G["ContainerFrame"..(bag+1)]
-			if frame then
-				for slot = 1, GetContainerNumSlots(bag) do
-					local btn = _G["ContainerFrame"..(bag+1).."Item"..slot]
-					if btn and not self:IsHooked(btn, "OnClick") then
-						self:RawHookScript(btn, "OnClick", function(button, btnName, ...)
-							DEFAULT_CHAT_FRAME:AddMessage("DBG: Per-button OnClick bag="..bag.." slot="..slot.." btn="..tostring(btnName).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
-							return self.hooks[button].OnClick(button, btnName, ...)
-						end)
-					end
-				end
-			end
 		end
 	end
 	self:RegisterEvent("MAIL_CLOSED", "Reset")
