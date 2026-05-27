@@ -15,7 +15,7 @@ function Postal_Express:MAIL_SHOW()
 			self:HookScript(GameTooltip, "OnTooltipSetItem")
 		end
 		if not self:IsHooked("PickupContainerItem") then
-			self:RawHook("PickupContainerItem")
+			self:RawHook("PickupContainerItem", true)
 		end
 	end
 	self:RegisterEvent("MAIL_CLOSED", "Reset")
