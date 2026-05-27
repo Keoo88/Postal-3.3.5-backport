@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: Postal
 ## Version: 4.3.0
-## Author: Xinhuan
+## Author: Keoo
 ## X-Backport: Keoo (WotLK 3.3.5) — backport of v4.3.0 from WotLK Classic
 ## X-Credits: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny aka The_Original_Manbot
 ## X-Category: Mail

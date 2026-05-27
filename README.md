@@ -120,6 +120,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 - Original addon: **Xinhuan**
 - Contributors: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
 - WotLK 3.3.5 backport: **Keoo (Warmane)**
+- Discord: https://discord.gg/sKpJbUrsvR
 - Libraries: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
   AceDB-3.0, AceHook-3.0, AceLocale-3.0
 
@@ -239,5 +240,6 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 - Оригинальный аддон: **Xinhuan**
 - Участники: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
 - Бэкпорт под WotLK 3.3.5: **Keoo (Warmane)**
+- Discord: https://discord.gg/sKpJbUrsvR
 - Библиотеки: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
   AceDB-3.0, AceHook-3.0, AceLocale-3.0
