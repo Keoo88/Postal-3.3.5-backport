@@ -109,7 +109,7 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 ### Compatibility
 
 - Built and tested on **WoW 3.3.5a** (Interface `30300`).
-- Tested on Warmane. Should work on any WotLK 3.3.5(a) private server.
+- Built for WoW 3.3.5a. Should work on any WotLK private server.
 
 ### License
 
@@ -119,7 +119,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 
 - Original addon: **Xinhuan**
 - Contributors: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
-- WotLK 3.3.5 backport: **Keoo (Warmane)**
+- WotLK 3.3.5 backport: **Keoo**
 - Discord: https://discord.gg/sKpJbUrsvR
 - Libraries: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
   AceDB-3.0, AceHook-3.0, AceLocale-3.0
@@ -229,7 +229,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ### Совместимость
 
 - Собрано и протестировано на **WoW 3.3.5a** (Interface `30300`).
-- Протестировано на Warmane. Должно работать на любом WotLK 3.3.5(a) сервере.
+- Собрано для WoW 3.3.5a. Должно работать на любом WotLK сервере.
 
 ### Лицензия
 
@@ -239,7 +239,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 
 - Оригинальный аддон: **Xinhuan**
 - Участники: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
-- Бэкпорт под WotLK 3.3.5: **Keoo (Warmane)**
+- Бэкпорт под WotLK 3.3.5: **Keoo**
 - Discord: https://discord.gg/sKpJbUrsvR
 - Библиотеки: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
   AceDB-3.0, AceHook-3.0, AceLocale-3.0

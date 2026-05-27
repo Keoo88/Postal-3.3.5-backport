@@ -604,7 +604,7 @@ function Postal.About()
 	tinsert(t, "")
 	tinsert(t, "- Keoo (WotLK 3.3.5 backport)")
 	tinsert(t, "")
-	tinsert(t, "WotLK 3.3.5 backport by Keoo (Warmane)")
+	tinsert(t, "WotLK 3.3.5 backport by Keoo")
 	Postal.aboutFrame.editBox:SetText(table.concat(t, "\n"))
 	Postal.aboutFrame:Show()
 	wipe(t) -- For garbage collection
