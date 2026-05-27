@@ -19,19 +19,26 @@ function Postal_Express:MAIL_SHOW()
 		for i, child in ipairs(kids) do
 			local objType = child:GetObjectType()
 			local name = child:GetName() or "(unnamed)"
-			DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..name.." type="..objType)
-			-- Check grandchildren too
-			local grandkids = {child:GetChildren()}
-			if #grandkids > 0 then
-				DEFAULT_CHAT_FRAME:AddMessage("DBG:    -> "..#grandkids.." grandchildren")
-				for j, gk in ipairs(grandkids) do
-					local gkType = gk:GetObjectType()
-					local gkName = gk:GetName() or "(unnamed)"
-					if gkType == "Button" then
-						DEFAULT_CHAT_FRAME:AddMessage("DBG:    Grandchild "..j..": "..gkName.." type="..gkType)
+			-- Check for bag buttons at any depth
+			local function scanFrames(f, depth, prefix)
+				if depth > 4 then return end
+				local myName = f:GetName() or "(unnamed)"
+				local myType = f:GetObjectType()
+				if depth == 1 then
+					DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..myName.." type="..myType)
+				end
+				if myType == "Button" then
+					local bag, slot = f.bag, f:GetID()
+					if bag ~= nil or slot ~= nil then
+						DEFAULT_CHAT_FRAME:AddMessage("DBG:    "..prefix.."Button: "..myName.." bag="..tostring(bag).." slot="..tostring(slot).." id="..tostring(f:GetID()))
 					end
 				end
+				local fKids = {f:GetChildren()}
+				for j, fk in ipairs(fKids) do
+					scanFrames(fk, depth + 1, prefix.."  ")
+				end
 			end
+			scanFrames(child, 1, "  ")
 		end
 	end
 	if Postal.db.profile.Express.EnableAltClick then
