@@ -264,7 +264,7 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 										end
 									else
 										for _, btn in ipairs(QAButtons) do
-											if itemSubType == btn[5] then
+											if btn[3] == classID and btn[4] == subclassID and itemSubType == btn[5] then
 												if SendMailNumberOfFreeSlots() > 0 then
 													PickupContainerItem(bagID, slotIndex)
 													ClickSendMailItemButton()
