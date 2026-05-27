@@ -19,8 +19,18 @@ function Postal_Express:MAIL_SHOW()
 		for i, child in ipairs(kids) do
 			local objType = child:GetObjectType()
 			local name = child:GetName() or "(unnamed)"
-			if objType == "Button" then
-				DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..name.." type="..objType)
+			DEFAULT_CHAT_FRAME:AddMessage("DBG:  Child "..i..": "..name.." type="..objType)
+			-- Check grandchildren too
+			local grandkids = {child:GetChildren()}
+			if #grandkids > 0 then
+				DEFAULT_CHAT_FRAME:AddMessage("DBG:    -> "..#grandkids.." grandchildren")
+				for j, gk in ipairs(grandkids) do
+					local gkType = gk:GetObjectType()
+					local gkName = gk:GetName() or "(unnamed)"
+					if gkType == "Button" then
+						DEFAULT_CHAT_FRAME:AddMessage("DBG:    Grandchild "..j..": "..gkName.." type="..gkType)
+					end
+				end
 			end
 		end
 	end
