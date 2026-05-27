@@ -140,10 +140,18 @@ end
 -- then calls the original, then processes Express Alt/Ctrl+Click logic.
 -- Works for any bag UI (Blizzard, ElvUI, etc.) since all UIs call this to pick up items.
 function Postal_Express:PickupContainerItem(bag, slot)
-	if processingBagClick or not SendMailFrame:IsVisible() then
+	if processingBagClick then
 		self.hooks["PickupContainerItem"](bag, slot)
 		return
 	end
+
+	if not SendMailFrame:IsVisible() then
+		self.hooks["PickupContainerItem"](bag, slot)
+		Postal:Print("DBG: SendMailFrame not visible")
+		return
+	end
+
+	Postal:Print("DBG: PickupContainerItem called bag="..tostring(bag).." slot="..tostring(slot).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 
 	local texture, count, itemid, itemlocked
 	if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
@@ -158,10 +166,10 @@ function Postal_Express:PickupContainerItem(bag, slot)
 
 	self.hooks["PickupContainerItem"](bag, slot)
 
-	local button = GetMouseButtonClicked() or "LeftButton"
-	if button ~= "LeftButton" then return end
+	Postal:Print("DBG: texture="..tostring(texture).." count="..tostring(count).." itemid="..tostring(itemid).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
 
 	if IsAltKeyDown() and Postal.db.profile.Express.EnableAltClick and texture then
+		Postal:Print("DBG: Alt+Click detected, attaching")
 		ClickSendMailItemButton()
 		if Postal.db.profile.Express.AutoSend and SendMailNameEditBox:GetText() ~= "" then
 			for i = 1, ATTACHMENTS_MAX_SEND do
@@ -172,6 +180,7 @@ function Postal_Express:PickupContainerItem(bag, slot)
 			end
 		end
 	elseif IsControlKeyDown() and Postal.db.profile.Express.BulkSend and itemid then
+		Postal:Print("DBG: Ctrl+Click detected, bulk send")
 		local itemq, _,_, itemc, itemsc, _, itemes = select(3,GetItemInfo(itemid))
 		itemes = itemes and #itemes > 0
 		if itemq and itemc then
