@@ -118,7 +118,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ### Credits
 
 - Original addon: **Xinhuan**
-- Contributors: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
+- Contributors: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny, Mr.Mole
 - WotLK 3.3.5 backport: **Keoo**
 - Discord: https://discord.gg/sKpJbUrsvR
 - Libraries: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
@@ -238,7 +238,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ### Благодарности
 
 - Оригинальный аддон: **Xinhuan**
-- Участники: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny
+- Участники: Ammo, Rabbit, Grennon, Mikk, oscarucb, Jonny, Mr.Mole
 - Бэкпорт под WotLK 3.3.5: **Keoo**
 - Discord: https://discord.gg/sKpJbUrsvR
 - Библиотеки: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceEvent-3.0,
