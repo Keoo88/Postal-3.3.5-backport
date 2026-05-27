@@ -37,10 +37,10 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 
 ### Features
 
-- 📬 **OpenAll** — open mail of selected types (AH, with attachments, etc.). Shift-click — no filters.
-- ✅ **Select** — checkboxes, bulk open/return. Shift — range, Ctrl — all from sender.
+- 📬 **OpenAll** — open mail of selected types (AH, with attachments, etc.). Shift-click - no filters.
+- ✅ **Select** — checkboxes, bulk open/return. Shift - range, Ctrl - all from sender.
 - 📋 **BlackBook** — contacts next to To: field, autocomplete from Alts, Friends, Guild.
-- ⚡ **Express** — Shift-click — take, Ctrl-click — return, Alt-click — attach from bags.
+- ⚡ **Express** — Shift-click - take, Ctrl-click - return, Alt-click - attach from bags.
 - 🔗 **CarbonCopy** — copy mail contents.
 - 🚫 **DoNotWant** — shows return or delete on expiry.
 - 🛡 **TradeBlock** — block trades and guild invites at mailbox.
@@ -155,10 +155,10 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 
 ### Особенности
 
-- 📬 **OpenAll** — массовое открытие писем по типу (аукцион, с вложениями...). Shift — без фильтров.
-- ✅ **Select** — отмечайте письма флажками, открывайте или возвращайте разом. Shift — выделить диапазон, Ctrl — все от адресата.
+- 📬 **OpenAll** — массовое открытие писем по типу (аукцион, с вложениями...). Shift - без фильтров.
+- ✅ **Select** — отмечайте письма флажками, открывайте или возвращайте разом. Shift - выделить диапазон, Ctrl - все от адресата.
 - 📋 **BlackBook** — список контактов рядом с полем «Кому», подсказки из альтов, друзей, гильдии.
-- ⚡ **Express** — Shift — забрать вложение, Ctrl — вернуть письмо, Alt — прикрепить предмет из сумки.
+- ⚡ **Express** — Shift - забрать вложение, Ctrl - вернуть письмо, Alt - прикрепить предмет из сумки.
 - 🔗 **CarbonCopy** — копирует содержимое любого письма.
 - 🚫 **DoNotWant** — показывает, вернётся письмо или удалится по сроку.
 - 🛡 **TradeBlock** — блокирует обмен и приглашения в гильдию у почты.
