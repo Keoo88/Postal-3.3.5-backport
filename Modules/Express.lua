@@ -10,12 +10,41 @@ local _G = getfenv(0)
 local processingBagClick = false
 
 function Postal_Express:MAIL_SHOW()
+	Postal:Print("DBG: MAIL_SHOW fired")
+	-- Debug: check what bag frames/buttons exist
+	for bag = 0, NUM_BAG_FRAMES do
+		local frame = _G["ContainerFrame"..(bag+1)]
+		if frame then
+			local btn1 = _G["ContainerFrame"..(bag+1).."Item1"]
+			Postal:Print("DBG: ContainerFrame"..(bag+1).." exists, Item1="..tostring(btn1))
+		end
+	end
 	if Postal.db.profile.Express.EnableAltClick then
 		if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 			self:HookScript(GameTooltip, "OnTooltipSetItem")
 		end
 		if not self:IsHooked("PickupContainerItem") then
 			self:RawHook("PickupContainerItem", true)
+			Postal:Print("DBG: PickupContainerItem hooked")
+		end
+		if not self:IsHooked("ContainerFrameItemButton_OnClick") then
+			self:RawHook("ContainerFrameItemButton_OnClick", true)
+			Postal:Print("DBG: ContainerFrameItemButton_OnClick hooked")
+		end
+		-- Hook Blizzard bag buttons (ContainerFrame1Item1 through ContainerFrame5ItemN)
+		for bag = 0, NUM_BAG_FRAMES do
+			local frame = _G["ContainerFrame"..(bag+1)]
+			if frame then
+				for slot = 1, GetContainerNumSlots(bag) do
+					local btn = _G["ContainerFrame"..(bag+1).."Item"..slot]
+					if btn and not self:IsHooked(btn, "OnClick") then
+						self:RawHookScript(btn, "OnClick", function(button, btnName, ...)
+							Postal:Print("DBG: Per-button OnClick bag="..bag.." slot="..slot.." btn="..tostring(btnName).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+							return self.hooks[button].OnClick(button, btnName, ...)
+						end)
+					end
+				end
+			end
 		end
 	end
 	self:RegisterEvent("MAIL_CLOSED", "Reset")
@@ -282,6 +311,13 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 		if added >= 1 then break end
 	end
 	ClearCursor()
+end
+
+-- Hook on ContainerFrameItemButton_OnClick — catches clicks from XML bag buttons
+-- and any code that calls this global function directly
+function Postal_Express:ContainerFrameItemButton_OnClick(frame, button, ...)
+	Postal:Print("DBG: ContainerFrameItemButton_OnClick fired button="..tostring(button).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
+	return self.hooks["ContainerFrameItemButton_OnClick"](frame, button, ...)
 end
 
 function Postal_Express.SetEnableAltClick(dropdownbutton, arg1, arg2, checked)
