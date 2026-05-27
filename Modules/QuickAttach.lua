@@ -256,6 +256,9 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 							itemID = tonumber(strmatch(link, "(%d+)"))
 							if itemID then
 								local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+								if itemID == 41511 then
+									DEFAULT_CHAT_FRAME:AddMessage("DBG QA: itemType="..tostring(itemType).." itemSubType="..tostring(itemSubType).." WotLKClassName="..tostring(WotLKClassName).." classID="..tostring(classID).." subclassID="..tostring(subclassID))
+								end
 								if itemType and WotLKClassName and itemType == WotLKClassName then
 									if subclassID == -1 then
 										if SendMailNumberOfFreeSlots() > 0 then
