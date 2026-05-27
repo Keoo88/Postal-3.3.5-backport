@@ -58,7 +58,7 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
    Rename it to **`Postal`**. WoW requires the folder name to match the addon.
 4. Move the `Postal` folder into:
    ```
-   World of Warcraft\Interface\AddOns\Postal
+   \Interface\AddOns\
    ```
 
 
@@ -177,7 +177,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
    папки с названием аддона.
 4. Переместите папку `Postal` в:
    ```
-   World of Warcraft\Interface\AddOns\Postal
+   \Interface\AddOns\
    ```
 
 
