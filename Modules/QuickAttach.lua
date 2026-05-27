@@ -225,6 +225,8 @@ function Postal_QuickAttachLeftButtonClick(classID, subclassID)
 	if Postal.WOWRetail then
 		bagIDmax = bagIDmax + NUM_REAGENTBAG_FRAMES
 	end
+	local _, _, _, _, _, infType, infSubType = GetItemInfo(41511)
+	DEFAULT_CHAT_FRAME:AddMessage("DBG QA 41511 exists: "..tostring(infType).."/"..tostring(infSubType))
 	for bagID = 0, bagIDmax, 1 do
 		if (bagID == 0) and Postal.db.profile.QuickAttach.EnableBag0 or
 			(bagID == 1) and Postal.db.profile.QuickAttach.EnableBag1 or
