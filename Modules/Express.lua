@@ -10,34 +10,12 @@ local _G = getfenv(0)
 local processingBagClick = false
 
 function Postal_Express:MAIL_SHOW()
-	DEFAULT_CHAT_FRAME:AddMessage("DBG: MAIL_SHOW fired")
-	-- Scan ElvUI bag frame children for button-like frames
-	local elvBag = _G["ElvUI_ContainerFrame"]
-	if elvBag then
-		local function scanFrames(f, depth, limit)
-			if depth > limit then return end
-			local myName = f:GetName() or "(unnamed)"
-			local myType = f:GetObjectType()
-			if depth >= 3 and myType == "Button" then
-				local bag, slot = f.bag, f:GetID()
-				local parent = f:GetParent()
-				local pName = parent and (parent:GetName() or "(unnamed)") or "nil"
-				DEFAULT_CHAT_FRAME:AddMessage("DBG:  depth="..depth.." btn="..myName.." par="..pName.." bag="..tostring(bag).." slot="..tostring(slot))
-			end
-			local fKids = {f:GetChildren()}
-			for _, fk in ipairs(fKids) do
-				scanFrames(fk, depth + 1, limit)
-			end
-		end
-		scanFrames(elvBag, 1, 6)
-	end
 	if Postal.db.profile.Express.EnableAltClick then
 		if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 			self:HookScript(GameTooltip, "OnTooltipSetItem")
 		end
-		if not self:IsHooked("PickupContainerItem") then
-			self:RawHook("PickupContainerItem", true)
-			DEFAULT_CHAT_FRAME:AddMessage("DBG: PickupContainerItem hooked")
+		if not self:IsHooked("ContainerFrameItemButton_OnModifiedClick") then
+			self:RawHook("ContainerFrameItemButton_OnModifiedClick", true)
 		end
 	end
 	self:RegisterEvent("MAIL_CLOSED", "Reset")
@@ -48,8 +26,8 @@ function Postal_Express:Reset(event)
 	if self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 		self:Unhook(GameTooltip, "OnTooltipSetItem")
 	end
-	if self:IsHooked("PickupContainerItem") then
-		self:Unhook("PickupContainerItem")
+	if self:IsHooked("ContainerFrameItemButton_OnModifiedClick") then
+		self:Unhook("ContainerFrameItemButton_OnModifiedClick")
 	end
 	processingBagClick = false
 	self:UnregisterEvent("BAG_UPDATE")
@@ -59,7 +37,7 @@ end
 
 function Postal_Express:OnEnable()
 	self:RawHook("InboxFrame_OnClick", true)
-	self:RawHook("InboxFrame_OnModifiedClick", "InboxFrame_OnClick", true) -- Eat all modified clicks too
+	self:RawHook("InboxFrame_OnModifiedClick", "InboxFrame_OnClick", true)
 	self:RawHook("InboxFrameItem_OnEnter", true)
 
 	self:RegisterEvent("MAIL_SHOW")
@@ -73,8 +51,8 @@ function Postal_Express:OnDisable()
 	if module:IsHooked(GameTooltip, "OnTooltipSetItem") then
 		module:Unhook(GameTooltip, "OnTooltipSetItem")
 	end
-	if module:IsHooked("PickupContainerItem") then
-		module:Unhook("PickupContainerItem")
+	if module:IsHooked("ContainerFrameItemButton_OnModifiedClick") then
+		module:Unhook("ContainerFrameItemButton_OnModifiedClick")
 	end
 	if module:IsHooked("InboxFrame_OnClick") then
 		module:Unhook("InboxFrame_OnClick")
@@ -137,7 +115,6 @@ function Postal_Express:InboxFrame_OnClick(button, index)
 		if cod <= 0 then
 			AutoLootMailItem(index)
 		end
-		--button:SetChecked(not button:GetChecked())
 	elseif IsControlKeyDown() then
 		local wasReturned, _, canReply = select(10, GetInboxHeaderInfo(index))
 		if not wasReturned and canReply then
@@ -158,60 +135,47 @@ function Postal_Express:OnTooltipSetItem(tooltip, ...)
 	end
 end
 
--- RawHook on PickupContainerItem — captures item info BEFORE the slot is emptied,
--- then calls the original, then processes Express Alt/Ctrl+Click logic.
--- Works for any bag UI (Blizzard, ElvUI, etc.) since all UIs call this to pick up items.
-function Postal_Express:PickupContainerItem(bag, slot)
-	if processingBagClick then
-		self.hooks["PickupContainerItem"](bag, slot)
-		return
-	end
-
-	if not SendMailFrame:IsVisible() then
-		self.hooks["PickupContainerItem"](bag, slot)
-		DEFAULT_CHAT_FRAME:AddMessage("DBG: SendMailFrame not visible bag="..tostring(bag).." slot="..tostring(slot))
-		return
-	end
-
-	DEFAULT_CHAT_FRAME:AddMessage("DBG: PickupContainerItem called bag="..tostring(bag).." slot="..tostring(slot).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
-
-	local texture, count, itemid, itemlocked
-	if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
-		texture = select(1, GetContainerItemInfo(bag, slot))
-		count = select(2, GetContainerItemInfo(bag, slot))
-		itemlocked = select(3, GetContainerItemInfo(bag, slot)) == 1
-		local link = GetContainerItemLink(bag, slot)
-		if link then
-			itemid = tonumber(strmatch(link, "(%d+)"))
-		end
-	end
-
-	self.hooks["PickupContainerItem"](bag, slot)
-
-	DEFAULT_CHAT_FRAME:AddMessage("DBG: texture="..tostring(texture).." count="..tostring(count).." itemid="..tostring(itemid).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
-
-	if IsAltKeyDown() and Postal.db.profile.Express.EnableAltClick and texture then
-		DEFAULT_CHAT_FRAME:AddMessage("DBG: Alt+Click detected, attaching")
-		ClickSendMailItemButton()
-		if Postal.db.profile.Express.AutoSend and SendMailNameEditBox:GetText() ~= "" then
-			for i = 1, ATTACHMENTS_MAX_SEND do
-				local _, itemTexture, stackCount = GetSendMailItem(i)
-				if itemTexture and texture == itemTexture and count == stackCount then
-					SendMailFrame_SendMail()
+-- Hook on ContainerFrameItemButton_OnModifiedClick — called by ALL bag buttons
+-- (Blizzard, ElvUI, etc.) when a bag item is clicked with modifier keys.
+function Postal_Express:ContainerFrameItemButton_OnModifiedClick(this, button, ...)
+	if button == "LeftButton" and SendMailFrame:IsVisible() and not CursorHasItem() then
+		local bag, slot = this:GetParent():GetID(), this:GetID()
+		if IsAltKeyDown() and Postal.db.profile.Express.EnableAltClick then
+			local texture, count = GetContainerItemInfo(bag, slot)
+			if texture then
+				PickupContainerItem(bag, slot)
+				ClickSendMailItemButton()
+				if Postal.db.profile.Express.AutoSend and SendMailNameEditBox:GetText() ~= "" then
+					for i = 1, ATTACHMENTS_MAX_SEND do
+						local _, itemTexture, stackCount = GetSendMailItem(i)
+						if itemTexture and texture == itemTexture and count == stackCount then
+							SendMailFrame_SendMail()
+						end
+					end
+				end
+				return
+			end
+		elseif IsControlKeyDown() and Postal.db.profile.Express.BulkSend then
+			local link = GetContainerItemLink(bag, slot)
+			if link then
+				local itemid = tonumber(strmatch(link, "(%d+)"))
+				if itemid then
+					local itemlocked = select(3, GetContainerItemInfo(bag, slot)) == 1
+					local itemq, _,_, itemc, itemsc, _, itemes = select(3,GetItemInfo(itemid))
+					itemes = itemes and #itemes > 0
+					if itemq and itemc then
+						PickupContainerItem(bag, slot)
+						ClickSendMailItemButton()
+						processingBagClick = true
+						self:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, itemes)
+						processingBagClick = false
+						return
+					end
 				end
 			end
 		end
-	elseif IsControlKeyDown() and Postal.db.profile.Express.BulkSend and itemid then
-		DEFAULT_CHAT_FRAME:AddMessage("DBG: Ctrl+Click detected, bulk send")
-		local itemq, _,_, itemc, itemsc, _, itemes = select(3,GetItemInfo(itemid))
-		itemes = itemes and #itemes > 0
-		if itemq and itemc then
-			ClickSendMailItemButton()
-			processingBagClick = true
-			self:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, itemes)
-			processingBagClick = false
-		end
 	end
+	return self.hooks["ContainerFrameItemButton_OnModifiedClick"](this, button, ...)
 end
 
 -- Shared BulkSend loop: scan all bags and attach matching items
@@ -256,17 +220,16 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 					end
 				end
 				if not tid or itemlocked2 or Postal_Express_IsSoulbound(b, s) then
-					-- item locked, already attached, soulbound
 				else
 					local tq, _,_, tc, tsc, _, tes = select(3,GetItemInfo(tid))
 					tsc = (tc or "").."."..(tsc or "")
 					tes = tes and #tes > 0
-					if (pass == 0 and itemq == 0 and tq == 0) -- vendor trash
-					or (pass == 0 and itemq == 2 and tq == 2 and itemes and tes) -- green boe gear
-					or (pass == 1 and tid == itemid) -- identical items
-					or (pass == 2 and tsc == scString) -- same subtype
-					or (pass == 3 and tc == itemc)   -- same type
-					or (pass == 4 and tq == itemq)   -- same quality
+					if (pass == 0 and itemq == 0 and tq == 0)
+					or (pass == 0 and itemq == 2 and tq == 2 and itemes and tes)
+					or (pass == 1 and tid == itemid)
+					or (pass == 2 and tsc == scString)
+					or (pass == 3 and tc == itemc)
+					or (pass == 4 and tq == itemq)
 					then
 						ClearCursor()
 						if Postal.WOWBCClassic or Postal.WOWWotLKClassic then
@@ -286,7 +249,7 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 								itemlocked3 = false
 							end
 						end
-						if itemlocked3 then -- now locked => added
+						if itemlocked3 then
 							added = added + 1
 							itemsinmail = itemsinmail + 1
 							if itemsinmail >= ATTACHMENTS_MAX_SEND then
@@ -294,7 +257,7 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 								processingBagClick = false
 								return
 							end
-						else -- failed
+						else
 							ClearCursor()
 						end
 					end
@@ -306,13 +269,6 @@ function Postal_Express:BulkSendLoop(itemid, itemlocked, itemq, itemc, itemsc, i
 	ClearCursor()
 end
 
--- Hook on ContainerFrameItemButton_OnClick — catches clicks from XML bag buttons
--- and any code that calls this global function directly
-function Postal_Express:ContainerFrameItemButton_OnClick(frame, button, ...)
-	DEFAULT_CHAT_FRAME:AddMessage("DBG: ContainerFrameItemButton_OnClick fired button="..tostring(button).." alt="..tostring(IsAltKeyDown()).." ctrl="..tostring(IsControlKeyDown()))
-	return self.hooks["ContainerFrameItemButton_OnClick"](frame, button, ...)
-end
-
 function Postal_Express.SetEnableAltClick(dropdownbutton, arg1, arg2, checked)
 	local self = Postal_Express
 	Postal.db.profile.Express.EnableAltClick = checked
@@ -321,13 +277,18 @@ function Postal_Express.SetEnableAltClick(dropdownbutton, arg1, arg2, checked)
 			if not self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 				self:HookScript(GameTooltip, "OnTooltipSetItem")
 			end
+			if not self:IsHooked("ContainerFrameItemButton_OnModifiedClick") then
+				self:RawHook("ContainerFrameItemButton_OnModifiedClick", true)
+			end
 		end
 	else
 		if self:IsHooked(GameTooltip, "OnTooltipSetItem") then
 			self:Unhook(GameTooltip, "OnTooltipSetItem")
 		end
+		if self:IsHooked("ContainerFrameItemButton_OnModifiedClick") then
+			self:Unhook("ContainerFrameItemButton_OnModifiedClick")
+		end
 	end
-	-- A hack to get the next button to disable/enable
 	local i, j = string.match(dropdownbutton:GetName(), "DropDownList(%d+)Button(%d+)")
 	j = tonumber(j) + 1
 	if checked then
