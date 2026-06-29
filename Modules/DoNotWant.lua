@@ -84,9 +84,18 @@ function Postal_DoNotWant:OnEnable()
 			b.returnicon:SetScript("OnClick", Postal_DoNotWant.Click)
 			b.returnicon:SetScript("OnEnter", b:GetScript("OnEnter"))
 			b.returnicon:SetScript("OnLeave", b:GetScript("OnLeave"))
+			-- Hide on creation so the icon never flashes for a frame on first open.
+			b.returnicon:Hide()
 		end
-		-- For enabling after a disable
-		b.returnicon:Show()
+		-- For enabling after a disable, show icons only for slots that actually
+		-- contain mail so the return/delete (red X) icons don't flash for a frame
+		-- on the first mailbox open before InboxFrame_Update hides the empty ones.
+		local index = i + ((InboxFrame.pageNum or 1) - 1) * 7
+		if index > GetInboxNumItems() then
+			b.returnicon:Hide()
+		else
+			b.returnicon:Show()
+		end
 	end
 
 	self:RawHook("InboxFrame_Update", true)

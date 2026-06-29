@@ -120,6 +120,10 @@ function Postal_Select:OnEnable()
 			text:SetPoint("BOTTOM", CB, "TOP")
 			text:SetText(i)
 			CB.text = text
+			-- Hide by default so a freshly created checkbox never flashes for a
+			-- frame on the first mailbox open. It is only ever shown by the
+			-- guarded logic below and by InboxFrame_Update, for slots with mail.
+			CB:Hide()
 		end
 	end
 
@@ -134,8 +138,16 @@ function Postal_Select:OnEnable()
 	-- For enabling after a disable
 	openButton:Show()
 	returnButton:Show()
+	-- Only show checkboxes for slots that actually contain mail. Showing all 7
+	-- unconditionally made an empty numbered (1-7) grid flicker for a frame on
+	-- the first mailbox open before InboxFrame_Update hid the empty ones.
 	for i = 1, 7 do
-		_G["PostalInboxCB"..i]:Show()
+		local index = i + ((InboxFrame.pageNum or 1) - 1) * 7
+		if index > GetInboxNumItems() then
+			_G["PostalInboxCB"..i]:Hide()
+		else
+			_G["PostalInboxCB"..i]:Show()
+		end
 	end
 end
 

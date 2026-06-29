@@ -4,15 +4,62 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Postal")
 Postal_QuickAttach.description = L["Allows you to quickly attach different trade items types to a mail."]
 Postal_QuickAttach.description2 = L[ [[|cFFFFCC00*|r A default recipient name can be specified by right clicking on a button.
 |cFFFFCC00*|r Which bags are used by this feature can be set in the main menu.]] ]
--- Trade Goods supported itemType for C_Item.GetItemInfo() by WoW release version
--- Classic: Trade Goods(0), Reagent(5, 0)
--- BCC: Cloth(5), Leather(6), Metal & Stone(7), Meat(8), Herb(9), Enchanting(12), Jewelcrafting(4), Parts(1), Elemental(10), Devices(3), Explosives(2), Materials(13), Other(11)
--- Shadowlands: Cloth(5), Leather(6), Metal & Stone(7), Cooking(8), Herb(9), Enchanting(12), Inscription(16), Jewelcrafting(4), Parts(1), Elemental(10), Optional Reagents(18), Other(11)
-local QAButtonPos = 0 -- Needed due to lack of static variables in lua
+
+-- This module is WotLK 3.3.5a only. Retail/Classic/BCC/Cata/MoP code paths and the
+-- C_Container / numeric classID API (which does not exist in 3.3.5a) have been removed.
+-- Trade Goods item subTypes are matched by their localized name returned from GetItemInfo().
+
 local QAButtonDialogInfo = "" -- Name|classID|subclassID
 local QAButtons
 local WotLKClassName -- cached localized class name (e.g. "Trade Goods")
 local WotLKSubTypeNames -- cached localized sub-type names per subclassID
+
+-- Positioning constants. Matches the Postal+ reference so the bar is anchored
+-- ("glued") to the top-right of the send-mail frame instead of floating.
+local QA_ANCHOR_X = -43
+local QA_ANCHOR_Y = -25
+local QA_BUTTON_GAP = 37
+local QA_SCALE = 0.73
+
+-- Reference items used to resolve the localized sub-type name for each subclassID.
+local SUBTYPE_REFS = {
+	[5]  = {2996, 4339, 33470, 41511}, -- Cloth
+	[6]  = {2318, 4234, 4304, 21887}, -- Leather
+	[7]  = {2770, 2771, 2772, 23424, 36909, 36913}, -- Metal & Stone
+	[8]  = {31737, 43015, 43013, 33454, 35953}, -- Cooking
+	[9]  = {33614, 37921, 36901, 36904, 36905}, -- Herb
+	[12] = {34054, 34055, 34057, 22445, 22573, 16204}, -- Enchanting
+	[4]  = {20824, 32227, 32228, 32229, 32230, 32231, 36917, 36920, 36921}, -- Jewelcrafting
+	[1]  = {23783, 23784, 23785, 23786, 23787, 32396}, -- Parts
+	[10] = {22572, 22574, 22575, 22576, 22577, 22578}, -- Elemental
+	[3]  = {32399, 32400, 32401, 32402, 32403}, -- Devices
+	[2]  = {4364, 4371, 7191, 10648, 18631}, -- Explosives
+	[11] = {4289, 4305, 6260, 6261, 10305, 10306}, -- Other
+	[13] = {39690, 39691, 36783, 35625, 35627}, -- Materials
+	[14] = {33803, 33802, 29736, 38848, 33809}, -- Armor Enchantment
+	[15] = {33804, 38973, 38974, 38978, 38979}, -- Weapon Enchantment
+}
+
+-- Resolve and cache the localized class/sub-type names from the game's item cache.
+local function BuildWotLKItemNames()
+	if not WotLKClassName then
+		WotLKClassName = select(6, GetItemInfo(34054)) -- Infinite Dust -> "Trade Goods" (localized)
+	end
+	if not WotLKSubTypeNames then
+		WotLKSubTypeNames = {}
+	end
+	for scID, itemIDs in pairs(SUBTYPE_REFS) do
+		if not WotLKSubTypeNames[scID] then
+			for _, itemID in ipairs(itemIDs) do
+				local subType = select(7, GetItemInfo(itemID))
+				if subType then
+					WotLKSubTypeNames[scID] = subType
+					break
+				end
+			end
+		end
+	end
+end
 
 -- Set a button's GameTooltip
 local function SetQAButtonGameTooltip(button, toolTip)
@@ -26,54 +73,57 @@ local function SetQAButtonGameTooltip(button, toolTip)
 	end)
 end
 
--- Create QuickAttach button
-local function CreateQAButton(name, texture, classID, subclassID, toolTip)
-	local ofsxBase, ofsyBase, ofsyGap = -45, -20, 0
-	local scale = 0.73 -- gives good results for classic and retail
-	local TempButton, QAButtonCharName
-	TempButton = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
-	local buttonHeight = math.floor(TempButton:GetHeight() + 0.5)
-	TempButton:SetScale(scale)
-	local icon = TempButton.icon or _G[name.."Icon"]
+-- Anchor a single button using the fixed layout. Used at both create and reposition
+-- time so the bar never "snaps"/jitters between an initial and a final position.
+local function PositionQAButton(button, index)
+	if not button then return end
+	button:ClearAllPoints()
+	button:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", QA_ANCHOR_X, QA_ANCHOR_Y - QA_BUTTON_GAP * (index - 1))
+end
+
+-- Create a QuickAttach button. Buttons are created hidden and positioned once with
+-- the final layout, then shown on MAIL_SHOW. This avoids the first-open flicker that
+-- happened when the load-on-demand addon created+repositioned buttons mid-frame.
+local function CreateQAButton(index, name, texture, classID, subclassID, toolTip)
+	local button = CreateFrame("Button", name, SendMailFrame, "ActionButtonTemplate")
+	button:SetScale(QA_SCALE)
+	local icon = button.icon or _G[name.."Icon"]
 	if icon then
 		icon:SetTexture(texture or "Interface\\Icons\\INV_Misc_QuestionMark")
 	end
-	TempButton:ClearAllPoints()
-	TempButton:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", ofsxBase, ofsyBase - (buttonHeight + ofsyGap) * QAButtonPos)
-	TempButton:RegisterForClicks("AnyUp")
-	TempButton:SetScript("OnClick", function(self, button, down) Postal_QuickAttachButtonClick(button, classID, subclassID) end)
-	TempButton:SetFrameLevel(TempButton:GetFrameLevel() + 1)
-	QAButtonCharName = Postal_QuickAttachGetQAButtonCharName(classID, subclassID)
-	if QAButtonCharName ~= "" then toolTip = toolTip.."\n"..L["Default recipient:"].." "..QAButtonCharName end
-	SetQAButtonGameTooltip(TempButton, toolTip)
-	QAButtonPos = QAButtonPos + 1
+	button:RegisterForClicks("AnyUp")
+	button:SetScript("OnClick", function(self, mouseButton) Postal_QuickAttachButtonClick(mouseButton, classID, subclassID) end)
+	button:SetFrameLevel(button:GetFrameLevel() + 1)
+	button:Hide()
+	PositionQAButton(button, index)
+	local charName = Postal_QuickAttachGetQAButtonCharName(classID, subclassID)
+	if charName ~= "" then toolTip = toolTip.."\n"..L["Default recipient:"].." "..charName end
+	SetQAButtonGameTooltip(button, toolTip)
 end
 
 -- Hide QuickAttach Buttons
 local function Postal_QuickAttachHideButtons()
-	local i, name
-	for i = 1, #QAButtons, 1 do
-		name = "Postal_QuickAttachButton"..tostring(i)
-		if _G[name] then _G[name]:Hide() end
+	if not QAButtons then return end
+	for i = 1, #QAButtons do
+		local button = _G[QAButtons[i][1]]
+		if button then button:Hide() end
 	end
 end
 
 -- Show QuickAttach Buttons
 local function Postal_QuickAttachShowButtons()
-	local i, name
-	for i = 1, #QAButtons, 1 do
-		name = "Postal_QuickAttachButton"..tostring(i)
-		if _G[name] then _G[name]:Show() end
+	if not QAButtons then return end
+	for i = 1, #QAButtons do
+		local button = _G[QAButtons[i][1]]
+		if button then button:Show() end
 	end
 end
 
+-- Re-anchor every button using the fixed layout.
 local function Postal_QuickAttach_Reposition()
-	for i = 1, #QAButtons, 1 do
-		local button = _G[QAButtons[i][1]]
-		if button then
-			button:ClearAllPoints()
-			button:SetPoint("TOPLEFT", SendMailFrame, "TOPRIGHT", -45, -20 - (37 + 0) * (i - 1))
-		end
+	if not QAButtons then return end
+	for i = 1, #QAButtons do
+		PositionQAButton(_G[QAButtons[i][1]], i)
 	end
 end
 
@@ -81,134 +131,36 @@ end
 function Postal_QuickAttach:OnEnable()
 	if not Postal_QuickAttachButton1 then
 		QAButtons = {}
-		if Postal.WOWWotLKClassic then
-			WotLKClassName = select(6, GetItemInfo(34054)) -- Infinite Dust → "Trade Goods" (localized)
-			WotLKSubTypeNames = {}
-			local refs = {
-				[5]  = {2996, 4339, 33470, 41511}, -- Cloth
-				[6]  = {2318, 4234, 4304, 21887}, -- Leather
-				[7]  = {2770, 2771, 2772, 23424, 36909, 36913}, -- Metal & Stone
-				[8]  = {31737, 43015, 43013, 33454, 35953}, -- Cooking
-				[9]  = {33614, 37921, 36901, 36904, 36905}, -- Herb
-				[12] = {34054, 34055, 34057, 22445, 22573, 16204}, -- Enchanting
-				[4]  = {20824, 32227, 32228, 32229, 32230, 32231, 36917, 36920, 36921}, -- Jewelcrafting
-				[1]  = {23783, 23784, 23785, 23786, 23787, 32396}, -- Parts
-				[10] = {22572, 22574, 22575, 22576, 22577, 22578}, -- Elemental
-				[3]  = {32399, 32400, 32401, 32402, 32403}, -- Devices
-				[2]  = {4364, 4371, 7191, 10648, 18631}, -- Explosives
-				[11] = {4289, 4305, 6260, 6261, 10305, 10306}, -- Other
-				[13] = {39690, 39691, 36783, 35625, 35627}, -- Materials
-				[14] = {33803, 33802, 29736, 38848, 33809}, -- Armor Enchantment
-				[15] = {33804, 38973, 38974, 38978, 38979}, -- Weapon Enchantment
-			}
-			for scID, itemIDs in pairs(refs) do
-				for _, itemID in ipairs(itemIDs) do
-					local subType = select(7, GetItemInfo(itemID))
-					if subType then
-						WotLKSubTypeNames[scID] = subType
-						break
-					end
-				end
-			end
-		end
-		if Postal.WOWClassic == true then
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(2018), 7, 0, L["Trade Goods"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", "Interface/Icons/inv_misc_food_02", 5, 0, L["Reagent"]})
-		end
-		if Postal.WOWBCClassic == true then
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(3908), 7, 5, L["Cloth"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", GetSpellTexture(2108), 7, 6, L["Leather"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton3", GetSpellTexture(2656), 7, 7, L["Metal & Stone"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton4", GetSpellTexture(2550), 7, 8, L["Cooking"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton5", GetSpellTexture(2383), 7, 9, L["Herb"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton6", GetSpellTexture(7411), 7, 12, L["Enchanting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton7", GetSpellTexture(25229), 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton8", "Interface/Icons/INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface/Icons/INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface/Icons/inv_gizmo_goblingtonkcontroller", 7, 3, L["Devices"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface/Icons/INV_Misc_Ammo_Gunpowder_01", 7, 2, L["Explosives"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface/Icons/INV_Misc_Rune_09", 7, 11, L["Other"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface/Icons/Ability_Ensnare", 7, -1, L["Trade Goods"]})
-		end
-		if Postal.WOWWotLKClassic == true then
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", "Interface\\Icons\\Trade_Tailoring", 7, 5, L["Cloth"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", "Interface\\Icons\\INV_Misc_LeatherScrap_02", 7, 6, L["Leather"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton3", "Interface\\Icons\\Trade_Mining", 7, 7, L["Metal & Stone"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton4", "Interface\\Icons\\INV_Misc_Food_15", 7, 8, L["Cooking"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton5", "Interface\\Icons\\Trade_Herbalism", 7, 9, L["Herb"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton6", "Interface\\Icons\\Trade_Engraving", 7, 12, L["Enchanting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton7", "Interface\\Icons\\INV_Misc_Gem_01", 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton8", "Interface\\Icons\\INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface\\Icons\\INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface\\Icons\\inv_gizmo_goblingtonkcontroller", 7, 3, L["Devices"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface\\Icons\\INV_Misc_Ammo_Gunpowder_01", 7, 2, L["Explosives"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface\\Icons\\INV_Elemental_Primal_Nether", 7, 13, L["Materials"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface\\Icons\\INV_Misc_Rune_09", 7, 11, L["Other"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton14", "Interface\\Icons\\INV_Scroll_03", 7, 14, L["Armor Enchantment"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton15", "Interface\\Icons\\INV_Weapon_Shortblade_05", 7, 15, L["Weapon Enchantment"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton16", "Interface\\Icons\\Ability_Ensnare", 7, -1, L["Trade Goods"]})
-		end
-		if Postal.WOWCataClassic == true then
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(3908), 7, 5, L["Cloth"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", GetSpellTexture(2108), 7, 6, L["Leather"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton3", GetSpellTexture(2656), 7, 7, L["Metal & Stone"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton4", GetSpellTexture(2550), 7, 8, L["Cooking"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton5", GetSpellTexture(2383), 7, 9, L["Herb"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton6", GetSpellTexture(7411), 7, 12, L["Enchanting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton7", GetSpellTexture(25229), 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton8", "Interface/Icons/INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface/Icons/INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface/Icons/inv_gizmo_goblingtonkcontroller", 7, 3, L["Devices"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface/Icons/INV_Misc_Ammo_Gunpowder_01", 7, 2, L["Explosives"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface/Icons/INV_Elemental_Primal_Nether", 7, 13, L["Materials"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface/Icons/INV_Misc_Rune_09", 7, 11, L["Other"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton14", 237050, 7, 14, L["Item Enchantment"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton15", "Interface/Icons/Ability_Ensnare", 7, -1, L["Trade Goods"]})
-		end
-		if Postal.WOWMists == true then
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(3908), 7, 5, L["Cloth"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", GetSpellTexture(2108), 7, 6, L["Leather"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton3", GetSpellTexture(2656), 7, 7, L["Metal & Stone"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton4", GetSpellTexture(2550), 7, 8, L["Cooking"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton5", GetSpellTexture(2383), 7, 9, L["Herb"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton6", GetSpellTexture(7411), 7, 12, L["Enchanting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton7", GetSpellTexture(25229), 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton8", "Interface/Icons/INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface/Icons/INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface/Icons/inv_gizmo_goblingtonkcontroller", 7, 3, L["Devices"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface/Icons/INV_Misc_Ammo_Gunpowder_01", 7, 2, L["Explosives"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface/Icons/INV_Elemental_Primal_Nether", 7, 13, L["Materials"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface/Icons/INV_Misc_Rune_09", 7, 11, L["Other"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton14", 237050, 7, 14, L["Item Enchantment"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton15", "Interface/Icons/Ability_Ensnare", 7, -1, L["Trade Goods"]})
-		end
-		if Postal.WOWRetail == true then
---			table.insert(QAButtons, {"Postal_QuickAttachButton1", GetSpellTexture(3908), 7, 5, L["Cloth"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton2", GetSpellTexture(2108), 7, 6, L["Leather"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton3", GetSpellTexture(2656), 7, 7, L["Metal & Stone"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton4", GetSpellTexture(2550), 7, 8, L["Cooking"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton5", GetSpellTexture(2383), 7, 9, L["Herb"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton6", GetSpellTexture(7411), 7, 12, L["Enchanting"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton7", GetSpellTexture(45357), 7, 16, L["Inscription"]})
---			table.insert(QAButtons, {"Postal_QuickAttachButton8", GetSpellTexture(25229), 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton1", 4620681, 7, 5, L["Cloth"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton2", 4620678, 7, 6, L["Leather"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton3", 4625105, 7, 7, L["Metal & Stone"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton4", 4620671, 7, 8, L["Cooking"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton5", 133939, 7, 9, L["Herb"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton6", 4620672, 7, 12, L["Enchanting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton7", 4620676, 7, 16, L["Inscription"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton8", 4620677, 7, 4, L["Jewelcrafting"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface/Icons/INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface/Icons/INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface/Icons/INV_Bijou_Green", 7, 18, L["Optional Reagents"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface/Icons/INV_Misc_Rune_09", 7, 11, L["Other"]})
-			table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface/Icons/Ability_Ensnare", 7, -1, L["Trade Goods"]})
-		end
-		for i = 1, #QAButtons, 1 do
-			CreateQAButton(QAButtons[i][1], QAButtons[i][2], QAButtons[i][3], QAButtons[i][4], QAButtons[i][5])
+		BuildWotLKItemNames()
+		table.insert(QAButtons, {"Postal_QuickAttachButton1", "Interface\\Icons\\Trade_Tailoring", 7, 5, L["Cloth"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton2", "Interface\\Icons\\INV_Misc_LeatherScrap_02", 7, 6, L["Leather"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton3", "Interface\\Icons\\Trade_Mining", 7, 7, L["Metal & Stone"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton4", "Interface\\Icons\\INV_Misc_Food_15", 7, 8, L["Cooking"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton5", "Interface\\Icons\\Trade_Herbalism", 7, 9, L["Herb"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton6", "Interface\\Icons\\Trade_Engraving", 7, 12, L["Enchanting"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton7", "Interface\\Icons\\INV_Misc_Gem_01", 7, 4, L["Jewelcrafting"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton8", "Interface\\Icons\\INV_Gizmo_FelIronCasing", 7, 1, L["Parts"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton9", "Interface\\Icons\\INV_Elemental_Primal_Air", 7, 10, L["Elemental"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton10", "Interface\\Icons\\inv_gizmo_goblingtonkcontroller", 7, 3, L["Devices"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton11", "Interface\\Icons\\INV_Misc_Ammo_Gunpowder_01", 7, 2, L["Explosives"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton12", "Interface\\Icons\\INV_Elemental_Primal_Nether", 7, 13, L["Materials"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton13", "Interface\\Icons\\INV_Misc_Rune_09", 7, 11, L["Other"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton14", "Interface\\Icons\\INV_Scroll_03", 7, 14, L["Armor Enchantment"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton15", "Interface\\Icons\\INV_Weapon_Shortblade_05", 7, 15, L["Weapon Enchantment"]})
+		table.insert(QAButtons, {"Postal_QuickAttachButton16", "Interface\\Icons\\Ability_Ensnare", 7, -1, L["Trade Goods"]})
+		for i = 1, #QAButtons do
+			CreateQAButton(i, QAButtons[i][1], QAButtons[i][2], QAButtons[i][3], QAButtons[i][4], QAButtons[i][5])
 		end
 	end
+	self:RegisterEvent("MAIL_SHOW")
+	-- If the mailbox is already open when the module is enabled (load-on-demand), lay out now.
+	if MailFrame and MailFrame:IsVisible() then
+		self:MAIL_SHOW()
+	end
+end
+
+-- Reposition and show the bar every time the mailbox opens so it is always anchored correctly.
+function Postal_QuickAttach:MAIL_SHOW()
 	Postal_QuickAttach_Reposition()
 	Postal_QuickAttachShowButtons()
 end
@@ -221,8 +173,7 @@ end
 
 -- Return how many free item slots are in the current send mail
 local function SendMailNumberOfFreeSlots()
-	local itemIndex, NumberOfFreeSlots
-	NumberOfFreeSlots = ATTACHMENTS_MAX_SEND
+	local NumberOfFreeSlots = ATTACHMENTS_MAX_SEND
 	for itemIndex = 1, ATTACHMENTS_MAX_SEND do
 		if GetSendMailItem(itemIndex) then
 			NumberOfFreeSlots = NumberOfFreeSlots - 1
@@ -232,126 +183,49 @@ local function SendMailNumberOfFreeSlots()
 end
 
 -- Take an action based on a QuickAttach button click
-function Postal_QuickAttachButtonClick(button, classID, subclassID)
-	if (button ==  "LeftButton") then Postal_QuickAttachLeftButtonClick(classID, subclassID) end
-	if (button ==  "RightButton") then Postal_QuickAttachRightButtonClick(classID, subclassID) end
+function Postal_QuickAttachButtonClick(mouseButton, classID, subclassID)
+	if (mouseButton == "LeftButton") then Postal_QuickAttachLeftButtonClick(classID, subclassID) end
+	if (mouseButton == "RightButton") then Postal_QuickAttachRightButtonClick(classID, subclassID) end
 end
 
 -- Attach as many items as possible of the specified type to the current send mail.
 function Postal_QuickAttachLeftButtonClick(classID, subclassID)
-	local bagID, bindType, itemclassID, itemID, itemsubclassID, locked, numberOfSlots, slot, slotIndex
-	local useOldAPI = Postal.WOWBCClassic or Postal.WOWWotLKClassic
-	if useOldAPI and not WotLKClassName then
-		WotLKClassName = select(6, GetItemInfo(34054))
-		if not WotLKSubTypeNames and Postal.WOWWotLKClassic then
-			WotLKSubTypeNames = {}
-			local refs = {
-				[5]  = {2996, 4339, 33470, 41511},
-				[6]  = {2318, 4234, 4304, 21887},
-				[7]  = {2770, 2771, 2772, 23424, 36909, 36913},
-				[8]  = {31737, 43015, 43013, 33454, 35953},
-				[9]  = {33614, 37921, 36901, 36904, 36905},
-				[12] = {34054, 34055, 34057, 22445, 22573, 16204},
-				[4]  = {20824, 32227, 32228, 32229, 32230, 32231, 36917, 36920, 36921},
-				[1]  = {23783, 23784, 23785, 23786, 23787, 32396},
-				[10] = {22572, 22574, 22575, 22576, 22577, 22578},
-				[3]  = {32399, 32400, 32401, 32402, 32403},
-				[2]  = {4364, 4371, 7191, 10648, 18631},
-				[11] = {4289, 4305, 6260, 6261, 10305, 10306},
-				[13] = {39690, 39691, 36783, 35625, 35627},
-				[14] = {33803, 33802, 29736, 38848, 33809},
-				[15] = {33804, 38973, 38974, 38978, 38979},
-			}
-			for scID, itemIDs in pairs(refs) do
-				for _, itemID in ipairs(itemIDs) do
-					local subType = select(7, GetItemInfo(itemID))
-					if subType then
-						WotLKSubTypeNames[scID] = subType
-						break
-					end
-				end
-			end
-		end
-	end
+	BuildWotLKItemNames()
+
 	local name = Postal_QuickAttachGetQAButtonCharName(classID, subclassID)
 	if name ~= "" then
 		SendMailNameEditBox:SetText(name)
 		SendMailNameEditBox:HighlightText()
 	end
-	local bagIDmax = NUM_BAG_FRAMES
-	if Postal.WOWRetail then
-		bagIDmax = bagIDmax + NUM_REAGENTBAG_FRAMES
-	end
-	for bagID = 0, bagIDmax, 1 do
-		if (bagID == 0) and Postal.db.profile.QuickAttach.EnableBag0 or
-			(bagID == 1) and Postal.db.profile.QuickAttach.EnableBag1 or
-			(bagID == 2) and Postal.db.profile.QuickAttach.EnableBag2 or
-			(bagID == 3) and Postal.db.profile.QuickAttach.EnableBag3 or
-			(bagID == 4) and Postal.db.profile.QuickAttach.EnableBag4 or
-			(bagID == 5) and Postal.db.profile.QuickAttach.EnableBag5
-		then
-			if useOldAPI then
-				numberOfSlots = GetContainerNumSlots(bagID)
-			else
-				numberOfSlots = C_Container.GetContainerNumSlots(bagID)
+
+	-- Resolve the localized sub-type name we are matching against for this button.
+	local targetSubType = WotLKSubTypeNames[subclassID]
+	if not targetSubType then
+		for _, btn in ipairs(QAButtons) do
+			if btn[3] == classID and btn[4] == subclassID then
+				targetSubType = btn[5]
+				break
 			end
-			for slotIndex = 1, numberOfSlots, 1 do
-				if useOldAPI then
-					locked = select(3, GetContainerItemInfo(bagID, slotIndex)) == 1
-				else
-					if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
-						local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
-						locked = itemInfo.isLocked
-					else
-						locked = false
-					end
-				end
+		end
+	end
+
+	for bagID = 0, NUM_BAG_FRAMES do
+		if Postal.db.profile.QuickAttach["EnableBag"..bagID] then
+			local numberOfSlots = GetContainerNumSlots(bagID)
+			for slotIndex = 1, numberOfSlots do
+				local locked = select(3, GetContainerItemInfo(bagID, slotIndex)) == 1
 				if not locked then
-					if useOldAPI then
-						local link = GetContainerItemLink(bagID, slotIndex)
-						if link then
-							itemID = tonumber(strmatch(link, "item:(%d+)"))
-							if itemID then
-								local itemName, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
-								if itemType and WotLKClassName and itemType == WotLKClassName then
-									if subclassID == -1 then
-										if SendMailNumberOfFreeSlots() > 0 then
-											PickupContainerItem(bagID, slotIndex)
-											ClickSendMailItemButton()
-										end
-									else
-										for _, btn in ipairs(QAButtons) do
-											if btn[3] == classID and btn[4] == subclassID and itemSubType == (WotLKSubTypeNames[subclassID] or btn[5]) then
-												if SendMailNumberOfFreeSlots() > 0 then
-													PickupContainerItem(bagID, slotIndex)
-													ClickSendMailItemButton()
-												end
-												break
-											end
-										end
-									end
-								end
-							end
-						end
-					else
-						if C_Container and C_Container.GetContainerItemInfo(bagID, slotIndex) then
-							local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
-							itemID = itemInfo.itemID
-						else
-							itemID = nil
-						end
+					local link = GetContainerItemLink(bagID, slotIndex)
+					if link then
+						local itemID = tonumber(strmatch(link, "item:(%d+)"))
 						if itemID then
-							bindType = select(14, GetItemInfo(itemID))
-							local BIND_ON_ACQUIRE = 1
-							if bindType ~= BIND_ON_ACQUIRE then
-								itemclassID = select(12, GetItemInfo(itemID))
-								if itemclassID == classID then
-									itemsubclassID = select(13, GetItemInfo(itemID))
-									if itemsubclassID == subclassID or subclassID == -1 then
-										if SendMailNumberOfFreeSlots() > 0 then
-											C_Container.PickupContainerItem(bagID, slotIndex)
-											ClickSendMailItemButton()
-										end
+							local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+							if itemType and WotLKClassName and itemType == WotLKClassName then
+								-- subclassID == -1 means "any Trade Goods".
+								if subclassID == -1 or itemSubType == targetSubType then
+									if SendMailNumberOfFreeSlots() > 0 then
+										PickupContainerItem(bagID, slotIndex)
+										ClickSendMailItemButton()
 									end
 								end
 							end
@@ -401,13 +275,13 @@ local function Postal_QuickAttachSetQAButtonCharName(name, classID, subclassID)
 	if name ~= "" then tinsert(db, buttonString) end
 	table.sort(db)
 	if #db == 0 then wipe(Postal.db.profile.QuickAttach) end
-	for i = 1, #QAButtons, 1 do
+	for i = 1, #QAButtons do
 		local c, s, t = QAButtons[i][3], QAButtons[i][4], QAButtons[i][5]
 		if tonumber(c) == tonumber(classID) and tonumber(s) == tonumber(subclassID) then
 			if name ~= "" then t = t.."\n"..L["Default recipient:"].." "..name end
 			SetQAButtonGameTooltip(_G[QAButtons[i][1]], t)
 		end
-	end	
+	end
 end
 
 -- Define static popup for default character name dialog.
@@ -417,11 +291,11 @@ StaticPopupDialogs["POSTAL_QUICKATTACH_CHARACTER_NAME"] = {
 	button2 = CANCEL,
 	hasEditBox = 1,
 	maxLetters = 128,
-	editBoxWidth = 350,  -- Needed in Cata
+	editBoxWidth = 350,
 	OnAccept = function(self)
 		local name, classID, subclassID = strsplit("|", QAButtonDialogInfo)
 		name = strtrim(self.editBox:GetText())
-		Postal_QuickAttachSetQAButtonCharName(name, classID, subclassID)	
+		Postal_QuickAttachSetQAButtonCharName(name, classID, subclassID)
 	end,
 	OnShow = function(self)
 		local name, classID, subclassID = strsplit("|", QAButtonDialogInfo)
@@ -434,7 +308,7 @@ StaticPopupDialogs["POSTAL_QUICKATTACH_CHARACTER_NAME"] = {
 		local parent = self:GetParent()
 		local name, classID, subclassID = strsplit("|", QAButtonDialogInfo)
 		name = strtrim(parent.editBox:GetText())
-		Postal_QuickAttachSetQAButtonCharName(name, classID, subclassID)	
+		Postal_QuickAttachSetQAButtonCharName(name, classID, subclassID)
 		parent:Hide()
 	end,
 	EditBoxOnEscapePressed = StaticPopupDialogs["SET_GUILDPLAYERNOTE"].EditBoxOnEscapePressed,
@@ -444,14 +318,13 @@ StaticPopupDialogs["POSTAL_QUICKATTACH_CHARACTER_NAME"] = {
 	hideOnEscape = 1
 }
 
--- Creat QuickAttach Menu
+-- Create QuickAttach Menu
 function Postal_QuickAttach.ModuleMenu(self, level)
 	if not level then return end
 	local info = self.info
 	wipe(info)
 	info.isNotRadio = 1
 	if level == 1 + self.levelAdjust then
-		local db = Postal.db.profile.QuickAttach
 		info.keepShownOnClick = 1
 
 		info.text = L["Enable for backpack"]
@@ -488,14 +361,5 @@ function Postal_QuickAttach.ModuleMenu(self, level)
 		info.arg2 = "EnableBag4"
 		info.checked = Postal.db.profile.QuickAttach.EnableBag4
 		UIDropDownMenu_AddButton(info, level)
-
-		if Postal.WOWRetail then
-			info.text = L["Enable for reagent bag"]
-			info.func = Postal.SaveOption
-			info.arg1 = "QuickAttach"
-			info.arg2 = "EnableBag5"
-			info.checked = Postal.db.profile.QuickAttach.EnableBag5
-			UIDropDownMenu_AddButton(info, level)
-		end
 	end
 end

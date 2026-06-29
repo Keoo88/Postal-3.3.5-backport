@@ -301,25 +301,17 @@ function Postal_BlackBook:OnChar(editbox, ...)
 	end
 
 	-- Check RealID friends that are online :: rewrite  due to API changes - Jonny
-	if not newname and db.AutoCompleteFriends then
+	-- Check RealID/Battle.net friends that are online. WotLK 3.3.5a only.
+	-- BNGetNumFriends may be absent on some 3.3.5 servers, so guard it.
+	if not newname and db.AutoCompleteFriends and BNGetNumFriends then
 		local numBNetTotal, numBNetOnline = BNGetNumFriends()
-		for i = 1, numBNetOnline do
-			if Postal.WOWRetail then
-				local accountInfo = C_BattleNet.GetFriendAccountInfo(i)
-				if (accountInfo.gameAccountInfo.characterName and accountInfo.gameAccountInfo.clientProgram == BNET_CLIENT_WOW and CanCooperateWithGameAccount(accountInfo) and accountInfo.gameAccountInfo.wowProjectID == 1 ) then
-					if strfind(strupper(accountInfo.gameAccountInfo.characterName), text, 1, 1) == 1 then
-						newname = accountInfo.gameAccountInfo.characterName
-						break
-					end
-				end
-			end
-			if Postal.WOWClassic or Postal.WOWBCClassic or Postal.WOWWotLKClassic or Postal.WOWCataClassic or Postal.WOWMists then
-				local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isRIDFriend, messageTime, canSoR = BNGetFriendInfo(i)
-				if (toonName and client == BNET_CLIENT_WOW and CanCooperateWithGameAccount and CanCooperateWithGameAccount(toonID)) then
-					if strfind(strupper(toonName), text, 1, 1) == 1 then
-						newname = toonName
-						break
-					end
+		for i = 1, (numBNetOnline or 0) do
+			-- WotLK signature: presenceID, givenName, surname, toonName, toonID, client, ...
+			local presenceID, givenName, surname, toonName, toonID, client = BNGetFriendInfo(i)
+			if toonName and client == BNET_CLIENT_WOW and ((not CanCooperateWithGameAccount) or CanCooperateWithGameAccount(toonID)) then
+				if strfind(strupper(toonName), text, 1, 1) == 1 then
+					newname = toonName
+					break
 				end
 			end
 		end
@@ -481,6 +473,16 @@ function Postal_BlackBook.BlackBookMenu(self, level)
 		info.disabled = not enableAltsMenu
 		info.text = L["Alts"]
 		info.value = "alt"
+		UIDropDownMenu_AddButton(info, level)
+
+		info.disabled = GetNumFriends() == 0
+		info.text = L["Friends"]
+		info.value = "friend"
+		UIDropDownMenu_AddButton(info, level)
+
+		info.disabled = not IsInGuild()
+		info.text = L["Guild"]
+		info.value = "guild"
 		UIDropDownMenu_AddButton(info, level)
 
 		wipe(info)
@@ -744,6 +746,7 @@ elseif UIDROPDOWNMENU_MENU_VALUE == "allalt" then
 
 		elseif strfind(UIDROPDOWNMENU_MENU_VALUE, "sapart") then
 			local db = altstable
+			local plre = UnitName("player").."-"..GetRealmName()
 			local startIndex = tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "sapart(%d+)")) * 25 - 24
 			local endIndex = math.min(startIndex+24, numAltsOnList)
 			for i = startIndex, endIndex do
@@ -778,6 +781,7 @@ elseif UIDROPDOWNMENU_MENU_VALUE == "allalt" then
 
 		elseif strfind(UIDROPDOWNMENU_MENU_VALUE, "aapart") then
 			local db = Postal.db.global.BlackBook.alts
+			local plre = UnitName("player").."-"..GetRealmName()
 			local startIndex = tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "aapart(%d+)")) * 25 - 24
 			local endIndex = math.min(startIndex+24, #db)
 			for i = startIndex, endIndex do
