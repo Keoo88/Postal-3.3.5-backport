@@ -1,8 +1,9 @@
 # Postal v4.3.0 — WotLK 3.3.5 backport
 
 <p align="center">
-  <img src="<img width="64" height="64" alt="Postal" src="https://github.com/user-attachments/assets/f1f25a23-13df-4bf9-ae65-9d04f4fbfdf4" />" alt="Postal icon" width="64" height="64"/>
+  <img src="<img width="64" height="64" alt="Postal" src="[https://github.com/user-attachments/assets/f1f25a23-13df-4bf9-ae65-9d04f4fbfdf4](https://github.com/user-attachments/assets/2f3a1afc-f7eb-4446-9e12-0b2f09835019)" />" alt="Postal icon" width="64" height="64"/>
 </p>
+<img width="64" height="64" alt="Postal" src="https://github.com/user-attachments/assets/2f3a1afc-f7eb-4446-9e12-0b2f09835019" />
 
 <p align="center">
   <b>Enhanced mailbox support for World of Warcraft 3.3.5a (WotLK).</b><br>
