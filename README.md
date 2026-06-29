@@ -1,7 +1,7 @@
 # Postal v4.3.0 — WotLK 3.3.5 backport
 
 <p align="center">
-  <img src="Postal.png" alt="Postal icon" width="64" height="64"/>
+  <img src="<img width="64" height="64" alt="Postal" src="https://github.com/user-attachments/assets/f1f25a23-13df-4bf9-ae65-9d04f4fbfdf4" />" alt="Postal icon" width="64" height="64"/>
 </p>
 
 <p align="center">
