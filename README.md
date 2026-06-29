@@ -1,9 +1,8 @@
 # Postal v4.3.0 — WotLK 3.3.5 backport
 
 <p align="center">
-  <img src="<img width="64" height="64" alt="Postal" src="[https://github.com/user-attachments/assets/f1f25a23-13df-4bf9-ae65-9d04f4fbfdf4](https://github.com/user-attachments/assets/2f3a1afc-f7eb-4446-9e12-0b2f09835019)" />" alt="Postal icon" width="64" height="64"/>
+  <img src="https://github.com/user-attachments/assets/4cb79011-1734-45c6-a541-cccbeaff0f52" alt="Postal icon" width="64" height="64"/>
 </p>
-<img width="64" height="64" alt="Postal" src="https://github.com/user-attachments/assets/4cb79011-1734-45c6-a541-cccbeaff0f52" />
 
 <p align="center">
   <b>Enhanced mailbox support for World of Warcraft 3.3.5a (WotLK).</b><br>
@@ -114,7 +113,7 @@ This repository is a **backport of Postal v4.3.0 from WotLK Classic to WoW
 
 ### License
 
-Released under the terms of the [LICENSE](LICENSE.txt) file.
+Released under the terms of the original Postal license (MIT).
 
 ### Credits
 
@@ -131,7 +130,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 ## Русский
 
 <p align="center">
-  <img src="Postal.png" alt="Postal icon" width="64" height="64"/>
+<img src="https://github.com/user-attachments/assets/4cb79011-1734-45c6-a541-cccbeaff0f52" alt="Postal icon" width="64" height="64"/>
 </p>
 
 <p align="center">
@@ -234,7 +233,7 @@ Released under the terms of the [LICENSE](LICENSE.txt) file.
 
 ### Лицензия
 
-Распространяется на условиях файла [LICENSE](LICENSE.txt).
+Распространяется на условиях оригинальной лицензии Postal (MIT).
 
 ### Благодарности
 
